@@ -42,7 +42,7 @@ function team(t){
    <div class="h3">Every path</div>
    <table class="ptable"><tr><th>Results</th><th class="r">Odds it happens</th><th class="r">Makes title gm</th></tr>
    ${rows.map(r=>`<tr><td><div style="font-size:12px;color:var(--muted);margin-bottom:3px">${nowW+r.wins}-${9-nowW-r.wins}</div>${wl(r.m)}</td><td class="r">${pct(r.pr)}</td><td class="r">${res(r.cond)}</td></tr>`).join("")}</table>
-   <div id="pb"></div>
+   <div id="pb" hidden></div>
    <div class="h3">Other games to root for</div>
    <div class="root">${root.slice(0,6).map(r=>`<div class="rrow"><div><b>${nm(r.fav)}</b> over ${nm(r.opp)}<small>${r.w} · ${nm(t)} odds ${pct(r.lo)} → ${pct(r.hi)}</small></div><div class="delta">+${((r.hi-r.lo)*100).toFixed(1)}</div></div>`).join("")}</div>`;
   builder(t);
@@ -184,7 +184,7 @@ function clinches(t,own){ // minimal "loses 1+/2+" requirements that guarantee a
   const weaker=(a,b)=>a.rc.every((x,k)=>x===0||(b.rc[k]!==0&&b.rc[k]>=x)); // a's demands are a subset of b's
   return res.filter(r=>!res.some(s=>s!==r&&weaker(s,r))).sort((a,b)=>b.W-a.W).slice(0,4); }
 function builder(t){
-  const el=$("pb"); if(!P.cells||!P.cells[t]||!P.cells[t].length||!P.rivals){ el.innerHTML=""; return; }
+  const el=$("pb"); if(el.hidden){ el.innerHTML=""; return; } if(!P.cells||!P.cells[t]||!P.cells[t].length||!P.rivals){ el.innerHTML=""; return; }
   const n=P.gamesLeft[t], R=P.rivals[t], now=P.baseWins[t], played=9-n;
   if(PB.t!==t){ PB={t,own:n,rc:[0,0,0,0,0]}; }
   const q=qry(t,PB.own,PB.rc); const p=q.W>0?q.I/q.W:0;
