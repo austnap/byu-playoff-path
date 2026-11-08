@@ -325,14 +325,11 @@ tr.rkwhy td{border-top:0;padding-top:0;padding-bottom:12px;font-size:13px;line-h
           <p>Below that: BYU's at-large odds by how it finishes, where it's likely to land in the final ranking, and the teams it's competing with for a spot.</p>
           <p><i>How it works:</i> Claude went through all 13 real committee rankings from 2024, 2025 and this season to learn what the committee actually values week to week, then built the model off that. What it values most: losses (by far), how good a team looks (ESPN's power rating), how hard its record was to get, and being in a power conference. Head-to-head and good wins matter less. Tested on seasons it never saw, it lands within 2 to 3 spots on average and gets 10 to 12 of the top 12 right.</p>
           <p>Use this tab to see whether BYU should move up after each week.</p></div>
-        <div><b>4. Rankings: predicting the committee</b>
-          <p>The model's projected top 25 for the committee's next release, with each team's move from the last real ranking.</p>
-          <p>After every Tuesday release, the scorecard grades the projection: exact spots, within 2 spots, top 12 matched and average miss, plus a side-by-side of projected vs actual.</p></div>
       </div>
     </details>
   </header>
 
-  <div class="seg seg3" role="tablist"><button role="tab" id="vGuide" aria-selected="true">Overall</button><button role="tab" id="vB12" aria-selected="false">Big 12</button><button role="tab" id="vAL" aria-selected="false">At-large</button><button role="tab" id="vRK" aria-selected="false">Rankings</button></div>
+  <div class="seg seg3" role="tablist"><button role="tab" id="vGuide" aria-selected="true">Overall</button><button role="tab" id="vB12" aria-selected="false">Big 12</button><button role="tab" id="vAL" aria-selected="false">At-large</button><button role="tab" id="vRK" aria-selected="false" hidden>Rankings</button></div>
   <div id="guideView" style="display:flex;flex-direction:column;gap:14px">
     <section class="card">
       <div class="label">BYU makes the College Football Playoff</div>
@@ -903,7 +900,7 @@ document.addEventListener("click",e=>{
   const vb=e.target.closest("#vB12,#vGuide,#vAL,#vRK"); if(vb) setView({vB12:"b12",vGuide:"guide",vAL:"al",vRK:"rk"}[vb.id]);
 });
 const pickEls=()=>[...document.querySelectorAll(".wrap > section")].filter(s=>s.id!=="howCard");
-function setView(v){ if(!["guide","b12","al","rk"].includes(v)) v="guide"; $("vRK").setAttribute("aria-selected",v==="rk"); $("rkView").hidden=v!=="rk";
+function setView(v){ if(!["guide","b12","al"].includes(v)) v="guide"; $("vRK").setAttribute("aria-selected",v==="rk"); $("rkView").hidden=v!=="rk";
   $("vGuide").setAttribute("aria-selected",v==="guide"); $("vB12").setAttribute("aria-selected",v==="b12"); $("vAL").setAttribute("aria-selected",v==="al");
   $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12"); const hc=document.getElementById("howCard"); if(hc) hc.hidden=v!=="b12";
   try{localStorage.setItem("b12view",v);}catch(e){} }

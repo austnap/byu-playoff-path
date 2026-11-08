@@ -245,7 +245,7 @@ document.addEventListener("click",e=>{
   const vb=e.target.closest("#vB12,#vGuide,#vAL,#vRK"); if(vb) setView({vB12:"b12",vGuide:"guide",vAL:"al",vRK:"rk"}[vb.id]);
 });
 const pickEls=()=>[...document.querySelectorAll(".wrap > section")];
-function setView(v){ if(!["guide","b12","al","rk"].includes(v)) v="guide"; $("vRK").setAttribute("aria-selected",v==="rk"); $("rkView").hidden=v!=="rk";
+function setView(v){ if(!["guide","b12","al"].includes(v)) v="guide"; $("vRK").setAttribute("aria-selected",v==="rk"); $("rkView").hidden=v!=="rk";
   $("vGuide").setAttribute("aria-selected",v==="guide"); $("vB12").setAttribute("aria-selected",v==="b12"); $("vAL").setAttribute("aria-selected",v==="al");
   $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12"); const hc=document.getElementById("howCard"); if(hc) hc.hidden=v!=="b12";
   try{localStorage.setItem("b12view",v);}catch(e){} }
