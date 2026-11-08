@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "odds-bot"
           git config user.email "odds-bot@users.noreply.github.com"
-          git add -A docs/data scripts/b12/scores.json scripts/b12/odds.json scripts/cfp/cfp.json scripts/cfp/committee.json
+          git add -A
           git diff --cached --quiet && exit 0
           git commit -m "Refresh odds data"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done
