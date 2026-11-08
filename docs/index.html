@@ -243,11 +243,12 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:700;text-t
 #guideView > section:first-child summary,#guideView > section:first-child .why,#guideView > section:first-child .why b{color:#fff}
 #guideView > section:first-child .care.c0{color:#fff;border-color:rgba(255,255,255,.5)}
 /* ---- mobile polish (audit) ---- */
-.tg{position:static!important;box-shadow:none}
+.tg{position:sticky;top:46px;z-index:15;box-shadow:0 8px 18px rgba(0,30,70,.12)}
 .hero h1{font-size:34px;line-height:.98}
 .hero h1 span{display:block}
 .wrap > header.hero .sub{max-width:34em}
-.tbtn{min-height:56px}
+.tbtn{min-height:56px;min-width:0}
+.game{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr)}
 .tbtn .tn{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;font-size:17px}
 .tbtn .sc{float:none;margin-left:auto;padding-left:4px}
 .tbtn .tag{flex:none;font-size:11px}
@@ -260,8 +261,9 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:700;text-t
 .pbrow select{min-height:40px}
 details > summary{padding-block:10px;list-style-position:inside}
 .wrap > header.hero .howto summary{padding-block:12px}
-.cfpbig{flex-wrap:wrap;row-gap:4px}
-.cfpbig span{flex:1 1 180px}
+.cfpbig{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;column-gap:14px}
+.cfpbig b{line-height:.9}
+.cfpbig span{font-size:13.5px;line-height:1.4}
 .ptable td,.ptable th{padding-inline:6px}
 .grow .main .r1{line-height:1.25}
 @media (min-width:1000px){
@@ -708,7 +710,7 @@ function heroInfo(){
 function guide(){
   heroInfo();
   const B=CF.byu, notIn=1-B.cfp;
-  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff<br>${CF.range?`likely range ${pc(CF.range[0])}–${pc(CF.range[1])} · `:""}Big 12 title game ${pc(B.ccg)}</span>`;
+  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff${CF.range?`<br>likely ${pc(CF.range[0])} to ${pc(CF.range[1])}`:""}<br>Big 12 title game: ${pc(B.ccg)}</span>`;
   $("split").innerHTML=`<i style="width:${B.champ*100}%;background:#ffffff"></i><i style="width:${B.atLarge*100}%;background:#8cc0f2"></i>`;
   $("split").insertAdjacentHTML("afterend","");
   const lbl=document.getElementById("splitlbl")||Object.assign(document.createElement("div"),{id:"splitlbl",className:"splitlbl"}); $("split").after(lbl);
