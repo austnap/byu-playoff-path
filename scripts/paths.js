@@ -156,7 +156,8 @@ function atlarge(){
 let WKD=WEEKLY0, wsel=0;
 function weekly(){
   if(!WKD||!WKD.weeks.length){ $("wkgames").innerHTML=""; return; }
-  if(wsel>=WKD.weeks.length) wsel=0; const W=WKD.weeks[wsel]; const nm2=ab=>(WKD.names[ab]||[ab])[0];
+  // board = the committee's next release; movers = the first week that still has games to play
+  const B=WKD.weeks[0]; const W=WKD.weeks.find(w=>w.games&&w.games.length)||B; const nm2=ab=>(WKD.names[ab]||[ab])[0];
   wsel=0; $("wkchips").innerHTML=""; if(0) WKD.weeks.map((w,i)=>`<button class="chipb wkc" data-i="${i}" aria-pressed="${i===wsel}" style="${i===wsel?"background:#0062B8":""}">${w.label} games → ${w.release} ranking</button>`).join("");
   const byuSpot=W.board.findIndex(b=>b.ab==="BYU")+1;
   $("wkbig").innerHTML=`<b>#${byuSpot||Math.round(W.byuAvg)}</b><span>BYU's projected spot in the ${W.release} ranking<br>Average across simulations: ${W.byuAvg.toFixed(1)}<br>${pct(W.byuTop12)} chance BYU is in the top 12</span>`;
@@ -167,9 +168,9 @@ function weekly(){
     const wk="a|"+g.h+"|"+g.a; return `<div class="grow tap" data-k="${wk}"><div class="bar6" style="background:${(WKD.names[g.team]||[,"#888"])[1]}"></div><div class="main"><div class="r1">${own?`BYU must beat ${nm2(g.opp)}`:`Root for <b>${nm2(g.team)}</b> over ${nm2(g.opp)}`}</div><div class="r2">BYU avg spot ${g.worst.toFixed(1)} → ${g.best.toFixed(1)}</div>${st}<div class="whyline" ${OPENWHY.has(wk)?"":"hidden"}>${whyRoot(g.team,g.opp,"al")}</div></div><div class="side"><span class="care c${g.lv}">${CARE[g.lv]}</span><span class="pts">↑${g.d.toFixed(2)}</span></div></div>`; }).join("") : `<p class="note">No games left this week move BYU's ranking.</p>`;
   const recOf=ab=>{ const t=(CF.teams||[]).find(x=>x.ab===ab); return t&&t.rec?t.rec:""; };
   const L=CF.committee&&CF.committee.latest; const last={}; if(L) L.ranks.forEach(x=>last[x.ab]=x.rk);
-  $("wkboardlbl").textContent=`Projected ${W.release} top 25`;
+  $("wkboardlbl").textContent=`Projected ${B.release} top 25`;
   $("wkboardnote").innerHTML=`<span class="tapnote">Tap any team to see why it's ranked there.</span> What the model expects the committee to release${L?`, compared with its ${L.label} ranking`:""}. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
-  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">${L?L.label:"Last"}</th></tr>`+W.board.slice(0,25).map((b,i)=>{ const lw=last[b.ab]; const mv=lw?(lw>i+1?`<span class="up">▲${lw-i-1}</span>`:lw<i+1?`<span class="dn">▼${i+1-lw}</span>`:`<span class="eq">–</span>`):`<span class="new">new</span>`;
+  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">${L?L.label:"Last"}</th></tr>`+B.board.slice(0,25).map((b,i)=>{ const lw=last[b.ab]; const mv=lw?(lw>i+1?`<span class="up">▲${lw-i-1}</span>`:lw<i+1?`<span class="dn">▼${i+1-lw}</span>`:`<span class="eq">–</span>`):`<span class="new">new</span>`;
     const k="r|"+b.ab; const open=OPENWHY.has(k);
     return `<tr class="rkrow ${b.ab==="BYU"?"me":""}" data-k="${k}"><td>${i+1}</td><td>${nm2(b.ab)} <span class="chev">${open?"▾":"▸"}</span></td><td class="r">${recOf(b.ab)}</td><td class="r">${lw?"#"+lw:""} ${mv}</td></tr><tr class="rkwhy ${b.ab==="BYU"?"me":""}" ${open?"":"hidden"}><td></td><td colspan="3">${rankWhy(b.ab,i+1,lw,last,nm2,recOf)}</td></tr>`; }).join("");
   rankScore();

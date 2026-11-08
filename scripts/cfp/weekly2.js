@@ -50,7 +50,10 @@ const nrm0=()=>{let u=0,v=0;while(!u)u=Math.random();v=Math.random();return Math
 const fq0=x=>Math.max(0,Math.min(30,x-70));
 const NSW=+(process.argv[2]||300000);
 for(const [lbl,from,to,rel] of WEEKS){
-  const ks=rem.map((g,k)=>g.date<to?k:-1).filter(k=>k>=0); if(!ks.length) continue;
+  const ks=rem.map((g,k)=>g.date<to?k:-1).filter(k=>k>=0);
+  // keep a finished week while its ranking hasn't been released yet (no games left, just the projection)
+  const lastRel=JSON.parse(require('fs').readFileSync(__dirname+'/rank.json')).rankings.find(r=>/Playoff/.test(r.name)).date;
+  if(!ks.length && !(new Date(to)>new Date(lastRel).getTime()+2*864e5)) continue;
   const inWeek=ks.filter(k=>rem[k].date>=from && rem[k].h!=null && rem[k].a!=null);
   const sumH=new Float64Array(RG),nH=new Float64Array(RG),topH=new Float64Array(RG); let sum=0,top=0; const dist=new Float64Array(41); const avgRk=new Float64Array(NT);
   const R=new Float64Array(NT), w=new Int8Array(RG);
