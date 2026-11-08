@@ -280,9 +280,25 @@ details > summary{padding-block:10px;list-style-position:inside}
   .wrap > .seg button{flex:none;font-size:16px!important;padding:15px 2px!important}
   #guideView > section:first-child{box-shadow:none}
 }
+
+/* ---- hero photo (layout 2: player on the right, fading into royal behind the title) ---- */
+.wrap > header.hero{position:relative;overflow:hidden;isolation:isolate;background:linear-gradient(135deg,#0062B8 0%,#00509a 55%,#002E5D 100%)}
+.wrap > header.hero > *:not(.hphoto):not(.hfade){position:relative;z-index:2}
+.hphoto{position:absolute;z-index:0;top:0;bottom:0;right:0;width:62%;background:url(img/hero.jpg) center 18%/cover no-repeat}
+.hfade{position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#0062B8 0%,#0062B8 46%,rgba(0,98,184,.78) 62%,rgba(0,70,140,.3) 82%,rgba(0,46,93,.12) 100%),linear-gradient(0deg,rgba(0,46,93,.55),transparent 45%)}
+.wrap > header.hero .howto[open]{background:rgba(0,46,93,.85)!important}
+.wrap > header.hero .sub{max-width:60%}
+.wrap > header.hero .howto{background:rgba(0,46,93,.55)}
+@media (min-width:1000px){
+  .wrap > header.hero .sub{max-width:34em}
+  .wrap > header.hero .howto{background:none}
+  .hphoto{width:520px;right:max(0px,calc(50vw - 720px))}
+  .hfade{background:linear-gradient(90deg,#0062B8 0%,#0062B8 calc(50vw + 190px),rgba(0,98,184,.55) calc(50vw + 320px),rgba(0,70,140,.12) calc(50vw + 520px)),linear-gradient(0deg,rgba(0,46,93,.5),transparent 45%)}
+}
 </style>
 </head><body><div class="wrap">
   <header class="hero">
+    <div class="hphoto" aria-hidden="true"></div><div class="hfade" aria-hidden="true"></div>
     <div class="eyebrow">BYU Football · 2026 Season</div>
     <h1>Cougars <span>Playoff Path</span></h1>
     <div class="sub">Two ways in: win the Big 12 (Arlington, Dec 4) or earn an at-large spot in the 12-team playoff.</div>
