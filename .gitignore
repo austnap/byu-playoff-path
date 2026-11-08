@@ -1,0 +1,12 @@
+scripts/b12/bf
+scripts/b12/result.json
+scripts/b12/data.h
+scripts/b12/run.json
+scripts/b12/ph.json
+scripts/b12/rivals.json
+scripts/cfp/nat.json
+scripts/cfp/rank.json
+scripts/cfp/v*.json
+scripts/cfp/*.log
+scripts/cfp/train.json
+node_modules/

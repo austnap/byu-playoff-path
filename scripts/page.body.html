@@ -1,0 +1,64 @@
+<div class="wrap">
+  <header>
+    <h1>BYU <span>Playoff Path</span></h1>
+    <div class="sub">Two ways in: win the Big 12 (Arlington, Dec 4) or earn an at-large spot in the 12-team playoff.</div>
+    <details class="howto">
+      <summary>How each tab works</summary>
+      <div class="howgrid">
+        <div><b>1. Overall: the bottom line</b>
+          <p>The big number is BYU's chance to make the 12-team playoff. The bar splits it into the two routes: win the Big 12 or get an at-large bid.</p>
+          <p>The game list is this week's games, ranked by how much each result changes that number. Root for the team shown, and tap any game to see why.</p>
+          <p><i>How it works:</i> the model plays out the rest of the season 1 million times (every game, the conference title games and the committee's final ranking), then fills the 12-team bracket. Game odds come from ESPN's power ratings.</p>
+          <p>If you only check one tab, check this one.</p></div>
+        <div><b>2. Big 12 title: route 1, win the conference</b>
+          <p>Up top is the projected title game and standings if every favorite wins. Tap any game to flip the winner and see how the race changes.</p>
+          <p>Further down are the exact odds to reach Arlington. Use "Build a path" to test "if X and Y happen, is BYU in?"</p>
+          <p><i>How it works:</i> no guessing. It checks every possible outcome of the remaining Big 12 games (268 million of them) and runs each one through the official Big 12 tiebreakers. It's math, not a model.</p>
+          <p>Use this tab to play out scenarios. It covers every remaining week.</p></div>
+        <div><b>3. At-large: route 2, get picked by the committee</b>
+          <p>The top section shows where BYU should land in the committee's next ranking and which games this week move it up.</p>
+          <p>Below that: BYU's at-large odds by how it finishes, where it's likely to land in the final ranking, and the teams it's competing with for a spot.</p>
+          <p><i>How it works:</i> Claude went through all 13 real committee rankings from 2024, 2025 and this season to learn what the committee actually values week to week, then built the model off that. What it values most: losses (by far), how good a team looks (ESPN's power rating), how hard its record was to get, and being in a power conference. Head-to-head and good wins matter less. Tested on seasons it never saw, it lands within 2 to 3 spots on average and gets 10 to 12 of the top 12 right.</p>
+          <p>Use this tab to see whether BYU should move up after each week.</p></div>
+      </div>
+    </details>
+  </header>
+
+  <section class="card tg" aria-live="polite">
+    <div class="label">Projected championship game</div>
+    <div class="tg-row"><div class="slot" id="s1"></div><div class="vs">VS</div><div class="slot" id="s2"></div></div>
+    <div class="tg-foot"><span id="tgnote"></span><div class="btns"><button class="ghost" id="reset">Reset to favorites</button></div></div>
+  </section>
+
+  <section class="card">
+    <div class="label">Projected standings</div>
+    <table id="st"></table>
+    <button class="ghost more" id="moreBtn"></button>
+    <ul class="why" id="why"></ul>
+  </section>
+
+  <section class="card" style="display:flex;flex-direction:column;gap:12px">
+    <div class="wkbar"><div class="label">Pick the games</div><div class="livebar" id="livenote"></div></div><div class="wkbar"><div class="legend"><b>Swing</b> = flipping it changes the title game</div></div>
+    <div class="tabs" role="tablist" id="tabs"></div>
+    <div class="games" id="games"></div>
+  </section>
+
+
+  <section class="card">
+    <details>
+      <summary>How favorites and tiebreaks work</summary>
+      <ul class="why">
+        <li><b>Order of steps:</b> (a) head-to-head, (b) record vs common opponents, (c) record vs the next-best common opponent going down the standings, (d) opponents' combined conference record, (e) total wins, (f) SportSource rating.</li>
+        <li><b>3+ team ties:</b> round robin counts only if every tied team played all the others, or one team beat all of them. Otherwise skip to (b).</li>
+        <li><b>Seed, then restart:</b> the steps run until one team comes out on top. That team is seeded and the rest start over from (a). Two left means the two-team procedure.</li>
+        <li><b>Step (c):</b> tied opponents count as one group. Record vs the #1 team counts for teams tied at #2. Record vs teams from your own original tie does not count, even after they've been seeded.</li>
+        <li><b>Hidden swing games:</b> big ties often come down to (d), so games between non-contenders can still decide the title game.</li>
+        <li><b>Favorites:</b> every game's line comes from ESPN's Football Power Index (FPI): the rating difference plus 2.5 points for home field.</li>
+        <li><b>Paths &amp; odds:</b> every possible outcome of the games still left is run through the tiebreakers. Each one is weighted by how likely it is: a spread turns into a win chance using a normal curve with a 14-point standard deviation (a 7-point favorite wins about 69% of the time).</li>
+        <li><b>Estimates:</b> (e) and (f) can't be known ahead of time. When a tie gets that far, the sim uses an estimated ranking and marks it "est."</li>
+      </ul>
+      <p class="note">Source: <a href="https://big12sports.com/documents/2024/9/5/Big_12_Football_2024_Tiebreaker_Policy.pdf" target="_blank" rel="noopener">Big 12 2024 Tiebreaker Policy</a>. Results through Oct 31 from bball.notnothing.net; Nov 6 onward from ESPN.</p>
+    </details>
+  </section>
+</div>
+<script>

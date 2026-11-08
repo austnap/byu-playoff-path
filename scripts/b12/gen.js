@@ -1,0 +1,34 @@
+const E=require('./engine.js');
+const POWER0={"UTAH":9.8,"BYU":5.5,"TTU":7,"ARIZ":6,"BAY":4,"HOU":4,"OKST":4.5,"ASU":-3.4,"UCF":-1.9,"CIN":-2.5,"ISU":-3.4,"TCU":-0.7,"WVU":-3.8,"COLO":-5.1,"KU":-4.7,"KSU":-3.9};
+const POWER=JSON.parse(require('fs').readFileSync('fpi.json')); const LINES={};
+function Phi(x){const t=1/(1+0.2316419*Math.abs(x));const d=0.3989423*Math.exp(-x*x/2);let p=d*t*(0.3193815+t*(-0.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));return x>0?1-p:p;}
+const SD=14;
+const ph=E.REMAINING.map(([h,a])=>{let s=LINES[h+"|"+a]??(POWER[h]-POWER[a]+2.5);s=Math.round(s*2)/2;
+  if(s===0) s=(POWER[h]>=POWER[a]?0.01:-0.01); return Phi(s/SD);});
+const fs=require('fs'); const SC=fs.existsSync('scores.json')?JSON.parse(fs.readFileSync('scores.json')).games:[];
+const FIN={}; SC.filter(x=>x.state==='post').forEach(x=>FIN[x.h+'|'+x.a]=x);
+const fpicks=E.REMAINING.map(([h,a])=>{const f=FIN[h+'|'+a]; return f? (f.hs>f.as?E.IDX[h]:E.IDX[a]) : -1;});
+const base=E.buildState(fpicks);
+const keep=E.REMAINING.map((g,i)=>i).filter(i=>fpicks[i]<0);
+const REM=keep.map(i=>E.REMAINING[i]); const ph2=keep.map(i=>ph[i]);
+let o=`#define NT 16\n#define NG ${REM.length}\n`;
+o+=`static const int BASEW[NT]={${base.wins.join(",")}};\n`;
+o+=`static const signed char BASEB[NT][NT]={${base.beat.map(r=>"{"+[...r].join(",")+"}").join(",")}};\n`;
+o+=`static const signed char OPPM[NT][NT]={${E.IDS.map((t,i)=>"{"+E.IDS.map((u,j)=>E.OPP[i].has(j)?1:0).join(",")+"}").join(",")}};\n`;
+o+=`static const int GH[NG]={${REM.map(g=>E.IDX[g[0]]).join(",")}};\nstatic const int GA[NG]={${REM.map(g=>E.IDX[g[1]]).join(",")}};\n`;
+o+=`static const double PH[NG]={${ph2.join(",")}};\n`;
+o+=`static const int RANKPOS[NT]={${E.IDS.map(t=>E.RATING.indexOf(t)).join(",")}};\n`;
+require('fs').writeFileSync('data.h',o);
+// rivals: top 5 other teams by last computed title odds; tracked teams: odds > 0.2%
+const prevO=fs.existsSync('odds.json')?JSON.parse(fs.readFileSync('odds.json')):null;
+const tt=prevO?prevO.title:E.IDS.map((t,i)=>16-i);
+const ordr=[...Array(E.N).keys()].sort((a,b)=>tt[b]-tt[a]);
+const RIV=E.IDS.map((t,i)=>ordr.filter(x=>x!==i).slice(0,5));
+const TRK=E.IDS.map((t,i)=>tt[i]>0.002?1:0);
+const GR=E.IDS.map((t,i)=>REM.filter(x=>x[0]===t||x[1]===t).length);
+o+=`static const int RIV[NT][5]={${RIV.map(r=>"{"+r.join(",")+"}").join(",")}};\nstatic const int TRK[NT]={${TRK.join(",")}};\nstatic const int GR[NT]={${GR.join(",")}};\n`;
+fs.writeFileSync('data.h',o);
+fs.writeFileSync('rivals.json',JSON.stringify({rivals:RIV,tracked:TRK,gamesLeft:GR}));
+fs.writeFileSync('ph.json',JSON.stringify(ph));
+fs.writeFileSync('run.json',JSON.stringify({games:REM.map((g,j)=>[g[0],g[1],+ph2[j].toFixed(4)]),baseWins:base.wins,finals:Object.keys(FIN)}));
+console.log(ph.map(x=>x.toFixed(2)).join(" "));

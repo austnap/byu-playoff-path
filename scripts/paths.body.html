@@ -1,0 +1,47 @@
+  <div class="seg seg3" role="tablist"><button role="tab" id="vGuide" aria-selected="true">Overall</button><button role="tab" id="vB12" aria-selected="false">Big 12 title</button><button role="tab" id="vAL" aria-selected="false">At-large</button></div>
+  <div id="guideView" style="display:flex;flex-direction:column;gap:14px">
+    <section class="card">
+      <div class="label">BYU makes the College Football Playoff</div>
+      <div class="cfpbig" id="cfpbig"></div>
+      <div class="split" id="split"></div>
+      <p class="note" id="gnote" style="margin:8px 0 0"></p>
+      <div class="legend2"><span class="care c3">Big</span> 5+ pts <span class="care c2">Some</span> 1-5 <span class="care c1">Barely</span> under 1 <span class="care c0">Unsure</span> direction depends on committee assumptions</div>
+      <details style="margin-top:10px"><summary>How sure is this?</summary><ul class="why"><li><b>Verified exactly:</b> all 16 Big 12 records and all 40 October scores match ESPN. The tiebreakers were checked by hand against the official procedure. Big 12 title-game odds come from checking every possible outcome, not sampling.</li><li><b>Committee model:</b> learned from the committee's 13 real rankings in 2024, 2025 and this season. On seasons it hadn't seen, it was off by about 2 to 3 spots on average and matched 10 to 12 of the top 12.</li><li><b>Still a model:</b> changing its assumptions moves BYU between the range shown above.</li><li><b>Game odds:</b> ESPN FPI. Upsets happen more than ratings say in some weeks and less in others.</li><li><b>Unsure games:</b> the right side to root for flips depending on the committee assumptions.</li></ul></details>
+    </section>
+    <div id="gweeks" style="display:flex;flex-direction:column;gap:14px"></div>
+  </div>
+  <div id="alView" hidden style="display:flex;flex-direction:column;gap:14px">
+    <section class="card">
+      <div class="label">Move BYU up in the next ranking</div>
+      <p class="note" style="margin:6px 0 0">This week's results that push BYU highest in the committee's next ranking. Tap a game for why.</p>
+      <div class="chips" id="wkchips" style="flex-wrap:wrap"></div>
+      <div class="cfpbig" id="wkbig"></div>
+      <div id="wkgames"></div>
+      <details style="margin-top:12px"><summary>Projected ranking after this week</summary><table class="ptable" id="wkboard"></table></details>
+    </section>
+    <section class="card">
+      <div class="label">BYU at-large bid</div>
+      <div class="cfpbig" id="albig"></div>
+      <p class="note" id="alnote" style="margin:8px 0 0"></p>
+    </section>
+    <section class="card"><div class="label">By BYU's finish</div><table class="ptable" id="altab"></table></section>
+    <section class="card"><div class="label">Where BYU lands in the final ranking</div><p class="note" style="margin:6px 0 0">If BYU doesn't win the Big 12. Line = usual cut for the last at-large spot.</p><div id="alrank"></div></section>
+    <section class="card"><div class="label">The bubble</div><p class="note" style="margin:6px 0 0">Every team with a real shot. Teams near BYU are who it's competing with.</p><table class="ptable" id="bubble"></table></section>
+    <section class="card"><details><summary>How the at-large model works</summary><ul class="why" id="alhow"></ul></details></section>
+  </div>
+  <div id="pathView" hidden style="display:flex;flex-direction:column;gap:14px">
+    <section class="card">
+      <div class="label">Odds to reach Arlington</div>
+      <p class="note" id="pnote" style="margin:6px 0 0"></p>
+      <div class="odds" id="odds"></div>
+    </section>
+    <section class="card">
+      <div class="label">Most likely title games</div>
+      <div class="mu" id="mu"></div>
+    </section>
+    <section class="card">
+      <div class="label">Team path</div>
+      <div class="chips" id="chips"></div>
+      <div id="tp"></div>
+    </section>
+  </div>
