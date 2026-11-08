@@ -27,7 +27,7 @@ function slot(el,t,S,seed){ el.style.background=col(t);
   el.innerHTML=`<div class="rec">#${seed} seed</div><div class="nm">${nm(t)}</div><div class="rec">${rec(S,t)} Big 12</div>`; }
 
 let LIVEOK=null;
-function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · ${B12LIVE?"every 5 sec":NATLIVE?"every 15 sec":gameDay()?"every 30 sec":"every 5 min (no games today)"} · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
+function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · ${B12LIVE?"every 5 sec":NATLIVE?"every 15 sec":gameDay()?"every 30 sec":"updates on game days (Fri and Sat)"} · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
 function render(){
   S0=buildState(REMAINING.map((g,i)=>finW(i)));
   const EP=eff(picks);
@@ -114,11 +114,15 @@ async function modelData(){
   const same=(k,v)=>{ if(!v) return true; const s=v.computedAt||JSON.stringify(v).length; if(LASTMODEL[k]===s) return true; LASTMODEL[k]=s; return false; };
   if(!same("o",o)&&window.renderPaths) window.renderPaths(o); if(!same("c",c)&&window.cfpUpdate) window.cfpUpdate(c); if(!same("w",w)&&window.weeklyUpdate) window.weeklyUpdate(w);
 }
-// game days (Thu, Fri, Sat, plus early Sunday for late games, Eastern time)
-function gameDay(){ const et=etNow(); const d=et.getDay(), h=et.getHours(); return d===4||d===5||d===6||(d===0&&h<4); }
-// Big 12 game live: every 5s. Other watched game live: every 15s. Game day: every 30s. Otherwise every 5 min. Full sweep every 10 min.
-function nextDelay(){ return B12LIVE?5000:NATLIVE?15000:gameDay()?30000:300000; }
-function loop(){ const full=Date.now()-LASTFULL>600000; if(full) LASTFULL=Date.now(); liveScores(full).finally(()=>setTimeout(loop,nextDelay())); }
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden) liveScores(false); });
+// game days: Friday and Saturday (Eastern), plus the early hours of Sunday so late Saturday games finish
+function gameDay(){ const et=etNow(); const d=et.getDay(), h=et.getHours(); return d===5||d===6||(d===0&&h<4); }
+// Game days only: Big 12 game live every 5s, other watched game live every 15s, otherwise every 30s. Full sweep every 10 min.
+// Other days: scores load once when the page opens (and when you come back to the tab), no polling.
+function nextDelay(){ if(!gameDay()) return null; return B12LIVE?5000:NATLIVE?15000:30000; }
+function loop(){ const full=Date.now()-LASTFULL>600000; if(full) LASTFULL=Date.now(); liveScores(full).finally(()=>{ const d=nextDelay(); if(d) setTimeout(loop,d); else POLLING=false; }); }
+let POLLING=true;
+// if the page is left open into a game day, start polling then
+setInterval(()=>{ if(!POLLING&&gameDay()){ POLLING=true; loop(); } },600000);
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) liveScores(!gameDay()); });
 setTimeout(()=>{ loop(); modelData(); },0); setInterval(modelData,120000);
 </script>
