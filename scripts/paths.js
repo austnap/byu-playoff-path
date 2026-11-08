@@ -168,7 +168,7 @@ function weekly(){
   const recOf=ab=>{ const t=(CF.teams||[]).find(x=>x.ab===ab); return t&&t.rec?t.rec:""; };
   const L=CF.committee&&CF.committee.latest; const last={}; if(L) L.ranks.forEach(x=>last[x.ab]=x.rk);
   $("wkboardlbl").textContent=`Projected ${W.release} top 25`;
-  $("wkboardnote").textContent=`What the model expects the committee to release${L?`, compared with its ${L.label} ranking`:""}. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
+  $("wkboardnote").innerHTML=`<span class="tapnote">Tap any team to see why it's ranked there.</span> What the model expects the committee to release${L?`, compared with its ${L.label} ranking`:""}. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
   $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">${L?L.label:"Last"}</th></tr>`+W.board.slice(0,25).map((b,i)=>{ const lw=last[b.ab]; const mv=lw?(lw>i+1?`<span class="up">▲${lw-i-1}</span>`:lw<i+1?`<span class="dn">▼${i+1-lw}</span>`:`<span class="eq">–</span>`):`<span class="new">new</span>`;
     const k="r|"+b.ab; const open=OPENWHY.has(k);
     return `<tr class="rkrow ${b.ab==="BYU"?"me":""}" data-k="${k}"><td>${i+1}</td><td>${nm2(b.ab)} <span class="chev">${open?"▾":"▸"}</span></td><td class="r">${recOf(b.ab)}</td><td class="r">${lw?"#"+lw:""} ${mv}</td></tr><tr class="rkwhy ${b.ab==="BYU"?"me":""}" ${open?"":"hidden"}><td></td><td colspan="3">${rankWhy(b.ab,i+1,lw,last,nm2,recOf)}</td></tr>`; }).join("");

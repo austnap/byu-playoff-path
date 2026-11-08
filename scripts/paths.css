@@ -195,6 +195,7 @@ details > summary{padding-block:10px;list-style-position:inside}
 #wkboard td{overflow:hidden;text-overflow:ellipsis}
 #wkboard tr.rkwhy td{white-space:normal;overflow:visible}
 tr.rkrow{cursor:pointer}
+.tapnote{display:block;font-weight:600;color:var(--accent);margin-bottom:2px}
 tr.rkrow .chev{color:var(--muted);font-size:11px;margin-left:2px}
 tr.rkwhy td{border-top:0;padding-top:0;padding-bottom:12px;font-size:13px;line-height:1.45;color:var(--muted)}
 </style>
