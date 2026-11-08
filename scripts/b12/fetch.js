@@ -20,8 +20,13 @@ const E=require('./engine.js'); const fs=require('fs');
         games.push({h:H.team.abbreviation,a:A.team.abbreviation,hs:+H.score||0,as:+A.score||0,state:s.state,detail:s.shortDetail,start:e.date,nat:true}); } }catch(e){}
   }
   const prev=fs.existsSync('scores.json')?JSON.parse(fs.readFileSync('scores.json')):{games:[]};
-  let watch=new Set(); try{ const c=JSON.parse(fs.readFileSync('../cfp/cfp.json')); c.roots.forEach(r=>{ if(Math.abs(r.cfpH-r.cfpA)>=0.003) watch.add(r.h+"|"+r.a); }); }catch(e){}
-  const fin=g=>g.filter(x=>x.state==="post"&&(!x.nat||watch.has(x.h+"|"+x.a))).map(x=>x.h+"|"+x.a).sort().join(",");
+  // Watched games: anything that moves BYU's playoff odds, anything that moves BYU's projected ranking,
+  // and any game involving a team in the projected top 30. A new final in any of them triggers a full rerun.
+  let watch=new Set(), watchTeams=new Set();
+  try{ const c=JSON.parse(fs.readFileSync('../cfp/cfp.json')); c.roots.forEach(r=>{ if(Math.abs(r.cfpH-r.cfpA)>=0.003) watch.add(r.h+"|"+r.a); }); (c.teams||[]).forEach(t=>watchTeams.add(t.ab)); }catch(e){}
+  try{ const w=JSON.parse(fs.readFileSync('../cfp/weekly.json')); (w.weeks||[]).forEach(wk=>{ (wk.games||[]).forEach(g=>watch.add(g.h+"|"+g.a)); (wk.board||[]).slice(0,30).forEach(b=>watchTeams.add(b.ab)); }); }catch(e){}
+  const watched=x=>!x.nat||watch.has(x.h+"|"+x.a)||watchTeams.has(x.h)||watchTeams.has(x.a);
+  const fin=g=>g.filter(x=>x.state==="post"&&watched(x)).map(x=>x.h+"|"+x.a).sort().join(",");
   const sig=g=>g.map(x=>x.h+x.hs+x.as+x.state+x.detail).sort().join(",");
   const out={updatedAt:new Date().toISOString(),games};
   fs.writeFileSync('scores.json',JSON.stringify(out));

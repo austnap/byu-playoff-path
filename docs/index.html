@@ -324,7 +324,11 @@ details > summary{padding-block:10px;list-style-position:inside}
       <div class="chips" id="wkchips" style="flex-wrap:wrap"></div>
       <div class="cfpbig" id="wkbig"></div>
       <div id="wkgames"></div>
-      <details style="margin-top:12px"><summary>Projected ranking after this week</summary><table class="ptable" id="wkboard"></table></details>
+    </section>
+    <section class="card">
+      <div class="label" id="wkboardlbl">Projected ranking</div>
+      <p class="note" style="margin:6px 0 0" id="wkboardnote"></p>
+      <table class="ptable" id="wkboard"></table>
     </section>
     <section class="card">
       <div class="label">BYU at-large bid</div>
@@ -779,7 +783,10 @@ function weekly(){
     let st=""; if(S&&S.state==="in"){ const lead=S.hs===S.as?null:(S.hs>S.as?S.h:S.a); st=`<div style="margin-top:3px"><span class="st ${lead===null?"live":lead===g.team?"good":"bad"}">● ${nm2(S.a)} ${S.as}-${S.hs} · ${S.detail}</span></div>`; }
     else if(S&&S.state==="post"){ const win=S.hs>S.as?S.h:S.a; st=`<div style="margin-top:3px"><span class="st ${win===g.team?"good":"bad"}">Final · ${win===g.team?"helped":"hurt"}</span></div>`; }
     const wk="a|"+g.h+"|"+g.a; return `<div class="grow tap" data-k="${wk}"><div class="bar6" style="background:${(WKD.names[g.team]||[,"#888"])[1]}"></div><div class="main"><div class="r1">${own?`BYU must beat ${nm2(g.opp)}`:`Root for <b>${nm2(g.team)}</b> over ${nm2(g.opp)}`}</div><div class="r2">BYU projected #${g.worst.toFixed(1)} → #${g.best.toFixed(1)}</div>${st}<div class="whyline" ${OPENWHY.has(wk)?"":"hidden"}>${whyRoot(g.team,g.opp,"al")}</div></div><div class="side"><span class="care c${g.lv}">${CARE[g.lv]}</span><span class="pts">↑${g.d.toFixed(2)}</span></div></div>`; }).join("") : `<p class="note">No games left this week move BYU's ranking.</p>`;
-  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Avg spot</th></tr>`+W.board.slice(0,20).map((b,i)=>`<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${b.r.toFixed(1)}</td></tr>`).join("");
+  const recOf=ab=>{ const t=(CF.teams||[]).find(x=>x.ab===ab); return t&&t.rec?t.rec:""; };
+  $("wkboardlbl").textContent=`Projected ${W.release} ranking`;
+  $("wkboardnote").textContent=`The committee's next top 25 as the model sees it, including this week's finished games. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
+  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">Avg spot</th></tr>`+W.board.slice(0,25).map((b,i)=>`<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${recOf(b.ab)}</td><td class="r">${b.r.toFixed(1)}</td></tr>`).join("");
 }
 document.addEventListener("click",e=>{ const c=e.target.closest(".wkc"); if(c){ wsel=+c.dataset.i; weekly(); } });
 window.weeklyUpdate=d=>{ WKD=d; weekly(); };
