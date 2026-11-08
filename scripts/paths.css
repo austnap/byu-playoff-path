@@ -67,7 +67,7 @@
 .rootchip{font-size:11.5px;font-weight:700;color:var(--fg)}
 .rootchip .care{margin-left:4px}
 .cfpbig{display:flex;align-items:baseline;gap:12px;margin-top:6px}
-.cfpbig b{font-family:var(--display);font-size:52px;line-height:1;font-weight:800;color:#0062B8}
+.cfpbig b{font-family:var(--display);font-size:52px;line-height:1;font-weight:800;color:var(--accent)}
 .cfpbig span{font-size:13px;color:var(--muted);line-height:1.35}
 .split{display:flex;height:12px;border-radius:6px;overflow:hidden;background:var(--chip);margin-top:12px}
 .split i{display:block;height:100%}
@@ -92,15 +92,15 @@
   .wrap{max-width:780px;gap:20px}
   .wrap > *,#alView > *{min-width:0}
   .rk > div{min-width:0;overflow:hidden}
-  .wrap > header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+  .wrap > header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-top:-48px;padding:40px max(16px, calc(50vw - 390px)) 26px}
   .wrap > header .sub{margin:0}
-  .howto{order:3;flex-basis:100%;margin:0;padding:0;border:0;background:none}
-  .howto summary{display:inline-block;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:1px}
-  .howto[open]{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .howto{order:3;flex-basis:100%;margin:0;padding:0;border:0;background:none!important}
+  .howto summary{display:inline-block;font-size:12px;color:#fff;border-bottom:1px solid rgba(255,255,255,.5);padding-bottom:1px}
+  .howto[open]{background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:14px 16px}
   h1{font-size:44px}
   .seg{background:none;padding:0;gap:28px;display:flex;border-bottom:1px solid var(--line);border-radius:0}
   .seg button{flex:none;border-radius:0;padding:10px 2px!important;background:none!important;box-shadow:none!important;border-bottom:2px solid transparent!important;margin-bottom:-1px;font-size:15px!important}
-  .seg button[aria-selected="true"]{border-bottom-color:var(--fg)!important}
+  .seg button[aria-selected="true"]{border-bottom-color:var(--accent)!important;border-bottom-width:3px!important}
   .card{padding:20px 22px;border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
   .wrap > section.tg{box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
   .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}

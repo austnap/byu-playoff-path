@@ -107,6 +107,8 @@ function guide(){
 }
 let CCALL=false;
 function committeeCard(){
+  // Card removed from the page; tracking still runs in the pipeline (docs/data/projections.json).
+  if(!document.getElementById("ccheck")) return;
   const C=CF.committee; if(!C){ document.getElementById("ccheck").hidden=true; return; }
   const L=C.latest, G=C.grade, W=(WKD&&WKD.weeks&&WKD.weeks[0])||null;
   const byu=L.ranks.find(x=>x.ab==="BYU");
