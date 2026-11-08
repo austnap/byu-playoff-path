@@ -27,7 +27,7 @@ function slot(el,t,S,seed){ el.style.background=col(t);
   el.innerHTML=`<div class="rec">#${seed} seed</div><div class="nm">${nm(t)}</div><div class="rec">${rec(S,t)} Big 12</div>`; }
 
 let LIVEOK=null;
-function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · ${(gameDay()||ANYLIVE)?"every 10 sec":"every 5 min (no games today)"} · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
+function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · ${B12LIVE?"every 5 sec":NATLIVE?"every 15 sec":gameDay()?"every 30 sec":"every 5 min (no games today)"} · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
 function render(){
   S0=buildState(REMAINING.map((g,i)=>finW(i)));
   const EP=eff(picks);
@@ -79,17 +79,33 @@ render();
 // ---- website mode: live scores straight from ESPN every 10s; model data from data/*.json every 2 min ----
 const ESPN="https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard";
 let LASTSIG=null, ANYLIVE=false, LASTMODEL={};
-async function liveScores(){
+// ---- live scores: small, frequent requests during games; a full sweep every 10 minutes ----
+const GAMES={}; let B12WEEK=null, LASTFULL=0, LASTNAT=0, NATLIVE=false, B12LIVE=false;
+const getJ=u=>fetch(u,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);
+const etNow=()=>new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"}));
+const ymd=d=>`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}`;
+function addEv(e,b12,wk){ const c=e.competitions[0], s=c.status.type; const H=c.competitors.find(x=>x.homeAway==="home"),A=c.competitors.find(x=>x.homeAway==="away");
+  const k=H.team.abbreviation+"|"+A.team.abbreviation; const old=GAMES[k];
+  GAMES[k]={h:H.team.abbreviation,a:A.team.abbreviation,hs:+H.score||0,as:+A.score||0,state:s.state,detail:s.shortDetail,start:e.date,nat:old?old.nat&&!b12:!b12,wk:wk||(old&&old.wk)||null}; }
+async function liveScores(full){
   try{
-    const games=[], seen=new Set(), add=(e,b12)=>{ const c=e.competitions[0], s=c.status.type; const H=c.competitors.find(x=>x.homeAway==="home"),A=c.competitors.find(x=>x.homeAway==="away"); const k=H.team.abbreviation+"|"+A.team.abbreviation; if(seen.has(k)) return; seen.add(k); games.push({h:H.team.abbreviation,a:A.team.abbreviation,hs:+H.score||0,as:+A.score||0,state:s.state,detail:s.shortDetail,start:e.date,nat:!b12}); };
-    const et=new Date(Date.now()-5*3600e3), ymd=d=>d.toISOString().slice(0,10).replace(/-/g,"");
-    const urls=[10,11,12,13].map(w=>[`${ESPN}?groups=4&limit=200&seasontype=2&dates=2026&week=${w}`,true]).concat([ymd(et),ymd(new Date(et-864e5))].map(d=>[`${ESPN}?groups=80&limit=400&dates=${d}`,false]));
-    const res=await Promise.all(urls.map(([u])=>fetch(u).then(r=>r.json()).catch(()=>null)));
-    res.forEach((j,i)=>{ if(j) (j.events||[]).forEach(e=>add(e,urls[i][1])); });
-    if(games.length){ const sig=games.map(g=>g.h+g.a+g.hs+g.as+g.state+g.detail).join("|"); const changed=sig!==LASTSIG; LASTSIG=sig;
-      setScores({updatedAt:new Date().toISOString(),games}); const was=LIVEOK; LIVEOK=true;
-      if(changed||was!==true) render(); else { const n=document.getElementById("livenote"); if(n) n.textContent=liveMsg(); }
-      ANYLIVE=games.some(g=>g.state==="in"); }
+    const now=Date.now(), et=etNow(), urls=[];
+    if(full){ [10,11,12,13].forEach(w=>urls.push([`${ESPN}?groups=4&limit=50&seasontype=2&dates=2026&week=${w}`,true,w])); }
+    else if(B12WEEK){ urls.push([`${ESPN}?groups=4&limit=50&seasontype=2&dates=2026&week=${B12WEEK}`,true,B12WEEK]); }
+    const natEvery=NATLIVE?15000:60000;
+    if(full||now-LASTNAT>=natEvery){ LASTNAT=now; urls.push([`${ESPN}?groups=80&limit=400&dates=${ymd(et)}`,false]); if(full||et.getHours()<5) urls.push([`${ESPN}?groups=80&limit=400&dates=${ymd(new Date(et-864e5))}`,false]); }
+    if(!urls.length) return;
+    const res=await Promise.all(urls.map(([u])=>getJ(u+(u.includes("?")?"&":"?")+"_="+now)));
+    res.forEach((j,i)=>{ if(j) (j.events||[]).forEach(e=>addEv(e,urls[i][1],urls[i][2])); });
+    const games=Object.values(GAMES); if(!games.length) return;
+    // which Big 12 week to poll: the one with a live game, else the next one kicking off within 36 hours
+    const b12=games.filter(g=>!g.nat&&g.wk); const live=b12.find(g=>g.state==="in");
+    const soon=b12.filter(g=>g.state==="pre"&&new Date(g.start)-now<36*3600e3).sort((a,b)=>a.start<b.start?-1:1)[0];
+    B12WEEK=live?live.wk:soon?soon.wk:null; B12LIVE=!!live;
+    NATLIVE=games.some(g=>g.nat&&g.state==="in"); ANYLIVE=B12LIVE||NATLIVE;
+    const sig=games.map(g=>g.h+g.a+g.hs+g.as+g.state+g.detail).join("|"); const changed=sig!==LASTSIG; LASTSIG=sig;
+    setScores({updatedAt:new Date().toISOString(),games}); const was=LIVEOK; LIVEOK=true;
+    if(changed||was!==true) render(); else { const n=document.getElementById("livenote"); if(n) n.textContent=liveMsg(); }
   }catch(e){ LIVEOK=false; render(); }
 }
 async function modelData(){
@@ -98,8 +114,11 @@ async function modelData(){
   const same=(k,v)=>{ if(!v) return true; const s=v.computedAt||JSON.stringify(v).length; if(LASTMODEL[k]===s) return true; LASTMODEL[k]=s; return false; };
   if(!same("o",o)&&window.renderPaths) window.renderPaths(o); if(!same("c",c)&&window.cfpUpdate) window.cfpUpdate(c); if(!same("w",w)&&window.weeklyUpdate) window.weeklyUpdate(w);
 }
-// game days (Thu, Fri, Sat, plus early Sunday for late games, Eastern time) or any game live: every 10s. Otherwise every 5 min.
-function gameDay(){ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(), h=et.getHours(); return d===4||d===5||d===6||(d===0&&h<4); }
-function loop(){ liveScores().finally(()=>setTimeout(loop,(gameDay()||ANYLIVE)?10000:300000)); }
+// game days (Thu, Fri, Sat, plus early Sunday for late games, Eastern time)
+function gameDay(){ const et=etNow(); const d=et.getDay(), h=et.getHours(); return d===4||d===5||d===6||(d===0&&h<4); }
+// Big 12 game live: every 5s. Other watched game live: every 15s. Game day: every 30s. Otherwise every 5 min. Full sweep every 10 min.
+function nextDelay(){ return B12LIVE?5000:NATLIVE?15000:gameDay()?30000:300000; }
+function loop(){ const full=Date.now()-LASTFULL>600000; if(full) LASTFULL=Date.now(); liveScores(full).finally(()=>setTimeout(loop,nextDelay())); }
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden) liveScores(false); });
 setTimeout(()=>{ loop(); modelData(); },0); setInterval(modelData,120000);
 </script>
