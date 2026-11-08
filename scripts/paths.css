@@ -104,7 +104,7 @@
   .card{padding:20px 22px;border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
   .wrap > section.tg{box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
   .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
-  .howgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+  .howgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
   .grow:hover,.orow:hover{background:color-mix(in srgb,var(--chip) 50%,transparent)}
 }
 /* ---- BYU football theme: royal + navy + white, yard-line hero, navy tab bar ---- */
@@ -186,4 +186,6 @@ details > summary{padding-block:10px;list-style-position:inside}
   .hphoto{width:max(400px,min(560px,calc(100vw - 740px)));right:max(0px,calc(50vw - 720px));-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28%,#000 72%,transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 28%,#000 72%,transparent 100%)}
   .hfade{background:linear-gradient(0deg,rgba(0,46,93,.45),transparent 45%)}
 }
+.ptable .up{color:var(--good);font-weight:700}.ptable .dn{color:#d1343a;font-weight:700}.ptable .eq{color:var(--muted)}.ptable .new{color:var(--accent);font-weight:700;font-size:11.5px;text-transform:uppercase}
+#rkView > *{min-width:0}
 </style>

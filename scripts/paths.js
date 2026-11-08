@@ -166,11 +166,23 @@ function weekly(){
     else if(S&&S.state==="post"){ const win=S.hs>S.as?S.h:S.a; st=`<div style="margin-top:3px"><span class="st ${win===g.team?"good":"bad"}">Final · ${win===g.team?"helped":"hurt"}</span></div>`; }
     const wk="a|"+g.h+"|"+g.a; return `<div class="grow tap" data-k="${wk}"><div class="bar6" style="background:${(WKD.names[g.team]||[,"#888"])[1]}"></div><div class="main"><div class="r1">${own?`BYU must beat ${nm2(g.opp)}`:`Root for <b>${nm2(g.team)}</b> over ${nm2(g.opp)}`}</div><div class="r2">BYU avg spot ${g.worst.toFixed(1)} → ${g.best.toFixed(1)}</div>${st}<div class="whyline" ${OPENWHY.has(wk)?"":"hidden"}>${whyRoot(g.team,g.opp,"al")}</div></div><div class="side"><span class="care c${g.lv}">${CARE[g.lv]}</span><span class="pts">↑${g.d.toFixed(2)}</span></div></div>`; }).join("") : `<p class="note">No games left this week move BYU's ranking.</p>`;
   const recOf=ab=>{ const t=(CF.teams||[]).find(x=>x.ab===ab); return t&&t.rec?t.rec:""; };
-  $("wkboardlbl").textContent=`Projected ${W.release} ranking`;
-  $("wkboardnote").textContent=`The committee's next top 25 as the model sees it, including this week's finished games. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
-  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">Avg spot</th></tr>`+W.board.slice(0,25).map((b,i)=>`<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${recOf(b.ab)}</td><td class="r">${b.r.toFixed(1)}</td></tr>`).join("");
+  const L=CF.committee&&CF.committee.latest; const last={}; if(L) L.ranks.forEach(x=>last[x.ab]=x.rk);
+  $("wkboardlbl").textContent=`Projected ${W.release} top 25`;
+  $("wkboardnote").textContent=`What the model expects the committee to release${L?`, compared with its ${L.label} ranking`:""}. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
+  $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">${L?L.label:"Last"}</th></tr>`+W.board.slice(0,25).map((b,i)=>{ const lw=last[b.ab]; const mv=lw?(lw>i+1?`<span class="up">▲${lw-i-1}</span>`:lw<i+1?`<span class="dn">▼${i+1-lw}</span>`:`<span class="eq">–</span>`):`<span class="new">new</span>`;
+    return `<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${recOf(b.ab)}</td><td class="r">${lw?"#"+lw:""} ${mv}</td></tr>`; }).join("");
+  rankScore();
 }
 document.addEventListener("click",e=>{ const c=e.target.closest(".wkc"); if(c){ wsel=+c.dataset.i; weekly(); } });
+function rankScore(){
+  const C=CF.committee||{}, H=C.history||[], G=C.grade;
+  $("rknote").textContent=H.length?"How close each projection was to the real committee ranking.":"The first grade comes after the committee's next ranking is released (Tuesday night). Track record when tested on past seasons the model never saw: about 2 to 3 spots off on average, with 10 to 12 of the top 12 right.";
+  $("rkscore").innerHTML=H.length?`<tr><th>Ranking</th><th class="r">Exact</th><th class="r">Within 2</th><th class="r">Top 12</th><th class="r">Avg miss</th></tr>`+H.slice().reverse().map(g=>`<tr><td>${g.release}</td><td class="r">${g.exact}/25</td><td class="r">${g.within2}/25</td><td class="r">${g.top12Hit}/12</td><td class="r">${g.avgMiss}</td></tr>`).join(""):"";
+  const card=$("rkcmpcard"); if(!G||!G.rows){ card.hidden=true; return; } card.hidden=false;
+  $("rkcmplbl").textContent=`Projected vs actual: ${G.release}`;
+  $("rkcmp").innerHTML=`<tr><th>Actual</th><th>Team</th><th class="r">Projected</th><th class="r">Off by</th></tr>`+G.rows.map(r=>{ const d=r.proj?r.proj-r.actual:null; const cls=d===null?"dn":Math.abs(d)<=2?"up":"dn";
+    return `<tr class="${r.ab==="BYU"?"me":""}"><td>${r.actual}</td><td>${r.name}</td><td class="r">${r.proj?"#"+r.proj:"—"}</td><td class="r"><span class="${cls}">${d===null?"missed":d===0?"exact":(d>0?"+":"")+d}</span></td></tr>`; }).join("");
+}
 window.weeklyUpdate=d=>{ WKD=d; weekly(); };
 window.cfpUpdate=d=>{ CF=d; guide(); atlarge(); };
 // ---- path builder: own record + rivals' losses -> exact odds ----
@@ -205,10 +217,10 @@ document.addEventListener("click",e=>{
   const ob=e.target.closest(".pbo"); if(ob){ PB.own= ob.dataset.own==="any"?null:+ob.dataset.own; builder(PB.t); return; }
   const c=e.target.closest(".chipb[data-t]"); if(c){ sel=+c.dataset.t; team(sel); return; }
   const o=e.target.closest(".orow"); if(o){ sel=+o.dataset.team; team(sel); $("tp").closest(".card").scrollIntoView({behavior:"smooth",block:"start"}); return; }
-  const vb=e.target.closest("#vB12,#vGuide,#vAL"); if(vb) setView({vB12:"b12",vGuide:"guide",vAL:"al"}[vb.id]);
+  const vb=e.target.closest("#vB12,#vGuide,#vAL,#vRK"); if(vb) setView({vB12:"b12",vGuide:"guide",vAL:"al",vRK:"rk"}[vb.id]);
 });
 const pickEls=()=>[...document.querySelectorAll(".wrap > section")];
-function setView(v){ if(!["guide","b12","al"].includes(v)) v="guide";
+function setView(v){ if(!["guide","b12","al","rk"].includes(v)) v="guide"; $("vRK").setAttribute("aria-selected",v==="rk"); $("rkView").hidden=v!=="rk";
   $("vGuide").setAttribute("aria-selected",v==="guide"); $("vB12").setAttribute("aria-selected",v==="b12"); $("vAL").setAttribute("aria-selected",v==="al");
   $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12"); const hc=document.getElementById("howCard"); if(hc) hc.hidden=v!=="b12";
   try{localStorage.setItem("b12view",v);}catch(e){} }
