@@ -81,13 +81,29 @@ document.addEventListener("click",e=>{ const g=e.target.closest(".grow.tap"); if
 
 const tn=ab=>(CF.names[ab]||[ab])[0];
 const pc=x=>pct(x);
+// hero strip: record, committee rank, next or live game
+function heroInfo(){
+  const el=document.getElementById("heroinfo"); if(!el) return;
+  const me=(CF.teams||[]).find(t=>t.ab==="BYU"); const chips=[];
+  if(me&&me.rec) chips.push(`<span class="hchip"><b>${me.rec}</b> overall</span>`);
+  try{ chips.push(`<span class="hchip"><b>${nowRec(IDX.BYU)}</b> Big 12</span>`); }catch(e){}
+  const L=CF.committee&&CF.committee.latest; const r=L&&L.ranks.find(x=>x.ab==="BYU");
+  if(r) chips.push(`<span class="hchip">CFP <b>#${r.rk}</b> · ${L.label}</span>`);
+  const live=Object.values(SC||{}).find(g=>(g.h==="BYU"||g.a==="BYU")&&g.state==="in");
+  if(live){ const opp=live.h==="BYU"?live.a:live.h, us=live.h==="BYU"?live.hs:live.as, them=live.h==="BYU"?live.as:live.hs;
+    chips.push(`<span class="hchip live">● LIVE · BYU ${us}, ${tn(opp)} ${them} · ${live.detail}</span>`); }
+  else { const i=REMAINING.findIndex((g,k)=>(g[0]==="BYU"||g[1]==="BYU")&&finW(k)<0);
+    if(i>=0){ const g=REMAINING[i], home=g[0]==="BYU"; chips.push(`<span class="hchip">Next: ${home?"vs":"at"} <b>${nm(IDX[home?g[1]:g[0]])}</b> · ${g[2]}</span>`); } }
+  el.innerHTML=chips.join("");
+}
 function guide(){
+  heroInfo();
   const B=CF.byu, notIn=1-B.cfp;
   $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff<br>${CF.range?`likely range ${pc(CF.range[0])}–${pc(CF.range[1])} · `:""}Big 12 title game ${pc(B.ccg)}</span>`;
-  $("split").innerHTML=`<i style="width:${B.champ*100}%;background:#0062B8"></i><i style="width:${B.atLarge*100}%;background:#6aa6e8"></i>`;
+  $("split").innerHTML=`<i style="width:${B.champ*100}%;background:#ffffff"></i><i style="width:${B.atLarge*100}%;background:#8cc0f2"></i>`;
   $("split").insertAdjacentHTML("afterend","");
   const lbl=document.getElementById("splitlbl")||Object.assign(document.createElement("div"),{id:"splitlbl",className:"splitlbl"}); $("split").after(lbl);
-  lbl.innerHTML=`<span><span class="dt" style="background:#0062B8"></span>Win Big 12 <b>${pc(B.champ)}</b></span><span><span class="dt" style="background:#6aa6e8"></span>At-large <b>${pc(B.atLarge)}</b></span><span><span class="dt" style="background:var(--chip)"></span>Miss <b>${pc(notIn)}</b></span>`;
+  lbl.innerHTML=`<span><span class="dt" style="background:#ffffff"></span>Win Big 12 <b>${pc(B.champ)}</b></span><span><span class="dt" style="background:#8cc0f2"></span>At-large <b>${pc(B.atLarge)}</b></span><span><span class="dt" style="background:rgba(255,255,255,.22)"></span>Miss <b>${pc(notIn)}</b></span>`;
   $("gnote").textContent=`This week's games that move BYU's playoff odds. Root for the team shown; tap a game for why. Based on ${CF.sims.toLocaleString()} simulated seasons using ESPN FPI. Updated ${new Date(CF.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})}.`;
   const wk=d=>{ const t=new Date(d); const day=t.getUTCDate(), mo=t.getUTCMonth(); if(mo===10&&day<=9) return "Nov 7"; if(mo===10&&day<=16) return "Nov 14"; if(mo===10&&day<=23) return "Nov 21"; return "Nov 28"; };
   const rows=CF.roots.map(r=>{ const hw=r.cfpH>=r.cfpA; const d=Math.abs(r.cfpH-r.cfpA); return {...r,w:wk(r.date),team:hw?r.h:r.a,opp:hw?r.a:r.h,hi:Math.max(r.cfpH,r.cfpA),lo:Math.min(r.cfpH,r.cfpA),d,lv:d>=0.05?3:d>=0.01?2:d>=0.003?1:0,cc:hw?r.ccgH-r.ccgA:r.ccgA-r.ccgH}; }).filter(r=>r.lv>0);
@@ -192,7 +208,7 @@ function setView(v){ if(!["guide","b12","al"].includes(v)) v="guide";
   $("vGuide").setAttribute("aria-selected",v==="guide"); $("vB12").setAttribute("aria-selected",v==="b12"); $("vAL").setAttribute("aria-selected",v==="al");
   $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12"); const hc=document.getElementById("howCard"); if(hc) hc.hidden=v!=="b12";
   try{localStorage.setItem("b12view",v);}catch(e){} }
-renderPaths(PATHS); window.renderPaths=renderPaths; window.guideRefresh=()=>{ if(!$("guideView").hidden) guide(); }; atlarge(); weekly();
+renderPaths(PATHS); window.renderPaths=renderPaths; window.guideRefresh=()=>{ heroInfo(); if(!$("guideView").hidden) guide(); }; atlarge(); weekly(); heroInfo();
 let v0="guide"; try{v0=localStorage.getItem("b12view")||"guide";}catch(e){} setView(v0);
 })();
 </script>

@@ -107,4 +107,36 @@
   .howgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
   .grow:hover,.orow:hover{background:color-mix(in srgb,var(--chip) 50%,transparent)}
 }
+/* ---- BYU football theme: royal + navy + white, yard-line hero, navy tab bar ---- */
+.wrap > header.hero{
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 2px,transparent 2px 64px),
+    linear-gradient(135deg,#0062B8 0%,#00509a 55%,#002E5D 100%);
+  border-bottom:0;padding-top:26px;padding-bottom:22px}
+.eyebrow{font-family:var(--display);font-weight:700;font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:#cfe3f7;margin-bottom:6px}
+.hero h1{font-size:40px;color:#fff}
+.hero h1 span{color:#9cc8f5}
+.heroinfo{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.hchip{font-size:13px;color:#fff;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);border-radius:99px;padding:5px 11px;white-space:nowrap}
+.hchip b{font-family:var(--display);font-size:15px;letter-spacing:.02em}
+.hchip.live{background:#fff;color:#c8102e;border-color:#fff;font-weight:700}
+.wrap > .seg{position:sticky;top:0;z-index:20;background:var(--navy);margin-inline:calc(50% - 50vw);margin-top:-14px;border-radius:0;padding:0 max(16px, calc(50vw - 280px));display:flex;gap:4px}
+.wrap > .seg button{flex:1;background:none!important;box-shadow:none!important;color:rgba(255,255,255,.72)!important;border-radius:0;border-bottom:3px solid transparent!important;padding:13px 4px!important}
+.wrap > .seg button[aria-selected="true"]{color:#fff!important;border-bottom-color:#fff!important}
+.tg{top:48px}
+.label{color:var(--accent)}
+#guideView > section:first-child{background:linear-gradient(135deg,#0062B8,#00468a);border:0;color:#fff}
+#guideView > section:first-child .label{color:#cfe3f7}
+#guideView > section:first-child .cfpbig b{color:#fff}
+#guideView > section:first-child .cfpbig span,#guideView > section:first-child .note,#guideView > section:first-child .splitlbl,#guideView > section:first-child .legend2{color:rgba(255,255,255,.85)}
+#guideView > section:first-child .splitlbl b{color:#fff}
+#guideView > section:first-child .split{background:rgba(255,255,255,.2)}
+#guideView > section:first-child summary,#guideView > section:first-child .why,#guideView > section:first-child .why b{color:#fff}
+#guideView > section:first-child .care.c0{color:#fff;border-color:rgba(255,255,255,.5)}
+@media (min-width:1000px){
+  .hero h1{font-size:64px}
+  .wrap > .seg{margin-top:-20px;padding:0 max(16px, calc(50vw - 390px));gap:30px;border-bottom:0}
+  .wrap > .seg button{flex:none;font-size:16px!important;padding:15px 2px!important}
+  #guideView > section:first-child{box-shadow:none}
+}
 </style>
