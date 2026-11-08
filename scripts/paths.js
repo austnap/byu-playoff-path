@@ -159,7 +159,7 @@ function weekly(){
   if(wsel>=WKD.weeks.length) wsel=0; const W=WKD.weeks[wsel]; const nm2=ab=>(WKD.names[ab]||[ab])[0];
   wsel=0; $("wkchips").innerHTML=""; if(0) WKD.weeks.map((w,i)=>`<button class="chipb wkc" data-i="${i}" aria-pressed="${i===wsel}" style="${i===wsel?"background:#0062B8":""}">${w.label} games → ${w.release} ranking</button>`).join("");
   const byuSpot=W.board.findIndex(b=>b.ab==="BYU")+1;
-  $("wkbig").innerHTML=`<b>#${byuSpot||Math.round(W.byuAvg)}</b><span>BYU's projected spot in the ${W.release} ranking<br>${pct(W.byuTop12)} chance BYU is in the top 12</span>`;
+  $("wkbig").innerHTML=`<b>#${byuSpot||Math.round(W.byuAvg)}</b><span>BYU's projected spot in the ${W.release} ranking<br>Average across simulations: ${W.byuAvg.toFixed(1)}<br>${pct(W.byuTop12)} chance BYU is in the top 12</span>`;
   const G=W.games.map(g=>{ const up=g.rH<=g.rA; const d=Math.abs(g.rA-g.rH); return {...g,team:up?g.h:g.a,opp:up?g.a:g.h,best:Math.min(g.rH,g.rA),worst:Math.max(g.rH,g.rA),d,lv:d>=0.5?3:d>=0.15?2:d>=0.05?1:0}; }).filter(g=>g.lv>0).sort((a,b)=>b.d-a.d);
   $("wkgames").innerHTML=G.length? G.map(g=>{ const own=g.h==="BYU"||g.a==="BYU"; const k=g.h+"|"+g.a; const S=(typeof SC!=="undefined")?SC[k]:null;
     let st=""; if(S&&S.state==="in"){ const lead=S.hs===S.as?null:(S.hs>S.as?S.h:S.a); st=`<div style="margin-top:3px"><span class="st ${lead===null?"live":lead===g.team?"good":"bad"}">● ${nm2(S.a)} ${S.as}-${S.hs} · ${S.detail}</span></div>`; }
