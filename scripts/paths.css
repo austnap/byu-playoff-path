@@ -86,32 +86,38 @@
 .whyline{margin-top:6px;font-size:13px;line-height:1.4;color:var(--fg);background:var(--chip);border-radius:8px;padding:7px 9px}
 /* ---- desktop layout (phones keep the single column) ---- */
 @media (min-width: 1000px){
-  body{padding-block:24px 48px}
-  .wrap{grid-auto-flow:row dense;max-width:1240px;display:grid;grid-template-columns:minmax(340px,400px) minmax(0,1fr);gap:20px;align-items:start}
+  body{padding-block:40px 64px}
+  .wrap{grid-auto-flow:row dense;max-width:1080px;display:grid;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start}
   .wrap > *,#alView > *,#guideView > *,#pathView > *{min-width:0}
   .rk > div{min-width:0;overflow:hidden}
   .wrap > header,.wrap > .seg,#howCard{grid-column:1 / -1}
-  .wrap > header{display:grid;grid-template-columns:auto 1fr;column-gap:28px;align-items:end}
-  .wrap > header .howto{grid-column:1 / -1}
-  h1{font-size:40px}
-  .seg{max-width:640px}
-  /* Overall tab: odds card left (sticky), games right */
-  #guideView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(340px,400px) minmax(0,1fr);gap:20px;align-items:start}
+  .wrap > header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px}
+  .wrap > header .sub{margin:0}
+  .howto{order:3;flex-basis:100%;margin:0;padding:0;border:0;background:none}
+  .howto summary{display:inline-block;font-size:12px;color:var(--muted);border-bottom:1px solid var(--line);padding-bottom:1px}
+  .howto[open]{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  h1{font-size:44px}
+  .seg{background:none;padding:0;gap:28px;display:flex;border-bottom:1px solid var(--line);border-radius:0}
+  .seg button{flex:none;border-radius:0;padding:10px 2px!important;background:none!important;box-shadow:none!important;border-bottom:2px solid transparent!important;margin-bottom:-1px;font-size:15px!important}
+  .seg button[aria-selected="true"]{border-bottom-color:var(--fg)!important}
+  .card{border-color:transparent;box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
+  /* Overall tab */
+  #guideView{grid-column:1 / -1;display:grid!important;grid-template-columns:340px minmax(0,1fr);gap:24px;align-items:start}
   #guideView[hidden]{display:none!important}
-  #guideView > section:first-child{position:sticky;top:16px}
-  /* At-large tab: this week's movers left, season view right */
-  #alView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  #guideView > section:first-child{position:sticky;top:24px}
+  /* At-large tab */
+  #alView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:24px;align-items:start}
   #alView[hidden]{display:none!important}
   #alView > section:first-child{grid-row:span 4}
-  /* Big 12 tab: title game + standings left, game picker right, paths below */
-  .wrap > section.tg{position:sticky;top:16px;grid-column:1;box-shadow:none}
+  /* Big 12 tab */
+  .wrap > section.tg{position:sticky;top:24px;grid-column:1;box-shadow:0 1px 2px rgba(0,0,0,.04),0 0 0 1px var(--line)}
   .wrap > section:has(#st){grid-column:1}
   .wrap > section:has(#games){grid-column:2;grid-row:span 2}
-  .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
-  #pathView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:start}
+  .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px}
+  #pathView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:24px;align-items:start}
   #pathView[hidden]{display:none!important}
   #pathView > section:last-child{grid-column:2;grid-row:1 / span 2}
-  .howgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
-  .grow:hover,.orow:hover{background:color-mix(in srgb,var(--chip) 60%,transparent)}
+  .howgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+  .grow:hover,.orow:hover{background:color-mix(in srgb,var(--chip) 50%,transparent)}
 }
 </style>

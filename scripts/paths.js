@@ -172,7 +172,7 @@ document.addEventListener("click",e=>{
 const pickEls=()=>[...document.querySelectorAll(".wrap > section")];
 function setView(v){ if(!["guide","b12","al"].includes(v)) v="guide";
   $("vGuide").setAttribute("aria-selected",v==="guide"); $("vB12").setAttribute("aria-selected",v==="b12"); $("vAL").setAttribute("aria-selected",v==="al");
-  $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12");
+  $("guideView").hidden=v!=="guide"; $("alView").hidden=v!=="al"; $("pathView").hidden=v!=="b12"; pickEls().forEach(s=>s.hidden=v!=="b12"); const hc=document.getElementById("howCard"); if(hc) hc.hidden=v!=="b12";
   try{localStorage.setItem("b12view",v);}catch(e){} }
 renderPaths(PATHS); window.renderPaths=renderPaths; window.guideRefresh=()=>{ if(!$("guideView").hidden) guide(); }; atlarge(); weekly();
 let v0="guide"; try{v0=localStorage.getItem("b12view")||"guide";}catch(e){} setView(v0);
