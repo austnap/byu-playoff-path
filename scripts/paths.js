@@ -170,10 +170,35 @@ function weekly(){
   $("wkboardlbl").textContent=`Projected ${W.release} top 25`;
   $("wkboardnote").textContent=`What the model expects the committee to release${L?`, compared with its ${L.label} ranking`:""}. Updates every time a game that matters goes final.${WKD.computedAt?" Last update "+new Date(WKD.computedAt).toLocaleString([], {weekday:"short",hour:"numeric",minute:"2-digit"})+".":""}`;
   $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">${L?L.label:"Last"}</th></tr>`+W.board.slice(0,25).map((b,i)=>{ const lw=last[b.ab]; const mv=lw?(lw>i+1?`<span class="up">▲${lw-i-1}</span>`:lw<i+1?`<span class="dn">▼${i+1-lw}</span>`:`<span class="eq">–</span>`):`<span class="new">new</span>`;
-    return `<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${recOf(b.ab)}</td><td class="r">${lw?"#"+lw:""} ${mv}</td></tr>`; }).join("");
+    const k="r|"+b.ab; const open=OPENWHY.has(k);
+    return `<tr class="rkrow ${b.ab==="BYU"?"me":""}" data-k="${k}"><td>${i+1}</td><td>${nm2(b.ab)} <span class="chev">${open?"▾":"▸"}</span></td><td class="r">${recOf(b.ab)}</td><td class="r">${lw?"#"+lw:""} ${mv}</td></tr><tr class="rkwhy ${b.ab==="BYU"?"me":""}" ${open?"":"hidden"}><td></td><td colspan="3">${rankWhy(b.ab,i+1,lw,last,nm2,recOf)}</td></tr>`; }).join("");
   rankScore();
 }
 document.addEventListener("click",e=>{ const c=e.target.closest(".wkc"); if(c){ wsel=+c.dataset.i; weekly(); } });
+
+// one or two sentences on why a team sits where it does in the projected ranking
+function rankWhy(ab,pos,lw,last,nm2,recOf){
+  const rec=recOf(ab)||""; const losses=+(rec.split("-")[1]||0);
+  const rk=x=>last[x]?`#${last[x]} `:"";
+  const g=Object.values(typeof SC!=="undefined"?SC:{}).filter(x=>x.state==="post"&&(x.h===ab||x.a===ab)).sort((a,b)=>(a.start<b.start?1:-1))[0];
+  let s1;
+  if(!lw) s1=`Unranked last time, projected to enter at #${pos}.`;
+  else if(lw===pos) s1=`Projected to stay at #${pos}.`;
+  else s1=`Projected ${lw>pos?"up":"down"} ${Math.abs(lw-pos)} from #${lw} to #${pos}.`;
+  let s2="";
+  if(g){ const home=g.h===ab, us=home?g.hs:g.as, them=home?g.as:g.hs, opp=home?g.a:g.h, won=us>them;
+    const oppName=`${rk(opp)}${nm2(opp)}`, where=home?"vs":"at";
+    if(won&&last[opp]&&last[opp]<=15) s2=`Beat ${oppName} ${us}-${them} ${where==="at"?"on the road":"at home"}. A win over a top team is one of the biggest boosts the committee gives.`;
+    else if(won&&last[opp]) s2=`Beat ${oppName} ${us}-${them}. A ranked win helps, but less than a win over a top-15 team.`;
+    else if(won) s2=`Beat ${nm2(opp)} ${us}-${them}, an expected win. Most of the movement comes from results around them.`;
+    else if(last[opp]&&last[opp]<=10) s2=`Lost to ${oppName} ${them}-${us}. Losses cost the most, but a loss to a top-10 team is the softest kind.`;
+    else if(last[opp]) s2=`Lost to ${oppName} ${them}-${us}. A loss to a ranked team still costs several spots.`;
+    else s2=`Lost to unranked ${nm2(opp)} ${them}-${us}. A loss to an unranked team is the biggest drop there is.`;
+  } else s2="Didn't play this week, so any change comes from teams around them winning or losing.";
+  const s3= losses===0?"Still unbeaten, which the committee weighs above everything.":losses===1?"One loss keeps them in the top tier.":losses>=3?`With ${losses} losses, they need help to climb.`:"";
+  return [s1,s2,s3].filter(Boolean).join(" ");
+}
+document.addEventListener("click",e=>{ const r=e.target.closest("tr.rkrow"); if(!r) return; const w=r.nextElementSibling; if(!w||!w.classList.contains("rkwhy")) return; w.hidden=!w.hidden; const k=r.dataset.k; w.hidden?OPENWHY.delete(k):OPENWHY.add(k); const c=r.querySelector(".chev"); if(c) c.textContent=w.hidden?"▸":"▾"; });
 function rankScore(){
   const C=CF.committee||{}, H=C.history||[], G=C.grade;
   $("rknote").textContent=H.length?"How close each projection was to the real committee ranking.":"The first grade comes after the committee's next ranking is released (Tuesday night). Track record when tested on past seasons the model never saw: about 2 to 3 spots off on average, with 10 to 12 of the top 12 right.";
