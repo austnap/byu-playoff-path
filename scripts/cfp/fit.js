@@ -16,9 +16,14 @@ const z=x=>x.map((v,k)=>(v-mu[k])/sd[k]);
 function pairs(r){ const P=[]; const rk=r.ranked; const set=new Set(rk);
   for(let i=0;i<rk.length;i++) for(let j=i+1;j<rk.length;j++) P.push([rk[i],rk[j]]);
   const un=r.ids.filter(id=>!set.has(id)&&r.X[id][0]>=0.6); for(const a of rk.slice(15)) for(const b of un) P.push([a,b]); return P; }
-function train(R,iters=3000,l2=0.01){ let w=new Array(K+1).fill(0); const data=R.flatMap(r=>pairs(r).map(([a,b])=>[z(r.X[a]).map((v,k)=>v-z(r.X[b])[k]), (r.h2h[a+"|"+b]?1:0)-(r.h2h[b+"|"+a]?1:0)]));
-  for(let it=0;it<iters;it++){ const g=new Array(K+1).fill(0); for(const [d,h] of data){ let s=h*w[K]; for(let k=0;k<K;k++) s+=w[k]*d[k]; const p=1/(1+Math.exp(-s)); const e=1-p; for(let k=0;k<K;k++) g[k]+=e*d[k]; g[K]+=e*h; }
-    for(let k=0;k<=K;k++) w[k]+= 0.5*(g[k]/data.length - l2*w[k]); } return w; }
+// Pairwise committee model. Releases from the season being predicted get extra weight (CURW) so the model
+// leans toward how this year's committee is behaving once it has seen a few of its rankings.
+const CURY=String(Math.max(...Object.keys(T).map(Number))), CURW=+(process.env.CURW||8);
+function train(R,iters=3000,l2=0.01,curY=CURY,curW=CURW){ let w=new Array(K+1).fill(0);
+  const data=R.flatMap(r=>pairs(r).map(([a,b])=>[z(r.X[a]).map((v,k)=>v-z(r.X[b])[k]), (r.h2h[a+"|"+b]?1:0)-(r.h2h[b+"|"+a]?1:0), r.Y===curY?curW:1]));
+  const W=data.reduce((s,x)=>s+x[2],0);
+  for(let it=0;it<iters;it++){ const g=new Array(K+1).fill(0); for(const [d,h,wt] of data){ let s=h*w[K]; for(let k=0;k<K;k++) s+=w[k]*d[k]; const p=1/(1+Math.exp(-s)); const e=(1-p)*wt; for(let k=0;k<K;k++) g[k]+=e*d[k]; g[K]+=e*h; }
+    for(let k=0;k<=K;k++) w[k]+= 0.5*(g[k]/W - l2*w[k]); } return w; }
 function score(w,r,id){ const x=z(r.X[id]); let s=0; for(let k=0;k<K;k++) s+=w[k]*x[k]; return s; }
 function evalRel(w,r){ // predicted order of all teams, with h2h swap pass
   const ord=r.ids.slice().sort((a,b)=>score(w,r,b)-score(w,r,a));
