@@ -184,6 +184,36 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:700;text-t
 .ptable tr.me td{background:color-mix(in srgb,#0062B8 14%,transparent)}
 .grow.tap{cursor:pointer}
 .whyline{margin-top:6px;font-size:13px;line-height:1.4;color:var(--fg);background:var(--chip);border-radius:8px;padding:7px 9px}
+/* ---- desktop layout (phones keep the single column) ---- */
+@media (min-width: 1000px){
+  body{padding-block:24px 48px}
+  .wrap{grid-auto-flow:row dense;max-width:1240px;display:grid;grid-template-columns:minmax(340px,400px) minmax(0,1fr);gap:20px;align-items:start}
+  .wrap > *,#alView > *,#guideView > *,#pathView > *{min-width:0}
+  .rk > div{min-width:0;overflow:hidden}
+  .wrap > header,.wrap > .seg,#howCard{grid-column:1 / -1}
+  .wrap > header{display:grid;grid-template-columns:auto 1fr;column-gap:28px;align-items:end}
+  .wrap > header .howto{grid-column:1 / -1}
+  h1{font-size:40px}
+  .seg{max-width:640px}
+  /* Overall tab: odds card left (sticky), games right */
+  #guideView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(340px,400px) minmax(0,1fr);gap:20px;align-items:start}
+  #guideView[hidden]{display:none!important}
+  #guideView > section:first-child{position:sticky;top:16px}
+  /* At-large tab: this week's movers left, season view right */
+  #alView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  #alView[hidden]{display:none!important}
+  #alView > section:first-child{grid-row:span 4}
+  /* Big 12 tab: title game + standings left, game picker right, paths below */
+  .wrap > section.tg{position:sticky;top:16px;grid-column:1;box-shadow:none}
+  .wrap > section:has(#st){grid-column:1}
+  .wrap > section:has(#games){grid-column:2;grid-row:span 2}
+  .games{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px}
+  #pathView{grid-column:1 / -1;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:20px;align-items:start}
+  #pathView[hidden]{display:none!important}
+  #pathView > section:last-child{grid-column:2;grid-row:1 / span 2}
+  .howgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+  .grow:hover,.orow:hover{background:color-mix(in srgb,var(--chip) 60%,transparent)}
+}
 </style>
 </head><body><div class="wrap">
   <header>
