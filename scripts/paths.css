@@ -79,6 +79,8 @@
 .rk .bb{height:14px;border-radius:3px;background:#0062B8}
 .rk.out .bb{background:var(--line)}
 .rkwrap{display:flex;flex-direction:column;gap:4px;margin-top:10px}
+.rk > div{min-width:0;overflow:hidden}
+#alView > *{min-width:0}
 .cut{border-top:2px dashed var(--warn);margin:3px 0;position:relative}
 .cut span{position:absolute;right:0;top:-9px;background:var(--card);padding:0 4px;font-size:11px;color:var(--warn);font-weight:700}
 .ptable tr.me td{background:color-mix(in srgb,#0062B8 14%,transparent)}

@@ -68,7 +68,7 @@ for(const [lbl,from,to,rel] of WEEKS){
   }
   const games=inWeek.map(k=>{ const g=rem[k]; const nA=NSW-nH[k]; return {id:g.id,h:AB[g.h],a:AB[g.a],p:+g.p.toFixed(3),date:g.date,rH:+(sumH[k]/nH[k]).toFixed(3),rA:+((sum-sumH[k])/nA).toFixed(3),tH:+(topH[k]/nH[k]).toFixed(4),tA:+((top-topH[k])/nA).toFixed(4)}; });
   const board=[...Array(NT).keys()].map(i=>({ab:AB[i],r:avgRk[i]/NSW})).sort((a,b)=>a.r-b.r).slice(0,25).map(x=>({ab:x.ab,r:+x.r.toFixed(1)}));
-  out.weeks.push({label:lbl,release:rel,byuAvg:+(sum/NSW).toFixed(2),byuTop12:+(top/NSW).toFixed(4),dist:[...dist].map(x=>+(x/NSW).toFixed(4)),games,board});
+  out.weeks.push({label:lbl,release:rel,releaseDate:to,byuAvg:+(sum/NSW).toFixed(2),byuTop12:+(top/NSW).toFixed(4),dist:[...dist].map(x=>+(x/NSW).toFixed(4)),games,board});
   const g2=games.map(g=>({...g,d:g.rA-g.rH})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
   console.log(`== ${lbl} -> ${rel} ranking: BYU avg #${(sum/NSW).toFixed(1)}, top-12 ${(top/NSW*100).toFixed(0)}%`);
   console.log(g2.slice(0,8).map(g=>`  ${g.a}@${g.h}: BYU rank if ${g.h} wins ${g.rH.toFixed(2)}, if ${g.a} wins ${g.rA.toFixed(2)}`).join("\n"));

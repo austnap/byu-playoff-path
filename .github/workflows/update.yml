@@ -1,7 +1,7 @@
 name: Refresh odds
 on:
   schedule:
-    - cron: '*/10 * * * 5,6,0'   # every 10 min Fri-Sun (UTC) during game days
+    - cron: '*/10 * * * 4,5,6,0'   # every 10 min Thu-Sun (UTC) during game days
     - cron: '17 */6 * * *'       # full refresh every 6 hours (new FPI, new committee ranking)
   workflow_dispatch:
     inputs:
@@ -31,7 +31,7 @@ jobs:
         run: |
           git config user.name "odds-bot"
           git config user.email "odds-bot@users.noreply.github.com"
-          git add -A docs/data scripts/b12/scores.json scripts/b12/odds.json scripts/cfp/cfp.json
+          git add -A docs/data scripts/b12/scores.json scripts/b12/odds.json scripts/cfp/cfp.json scripts/cfp/committee.json
           git diff --cached --quiet && exit 0
           git commit -m "Refresh odds data"
           for i in 1 2 3; do git pull --rebase -X theirs origin main && git push && exit 0; sleep 5; done

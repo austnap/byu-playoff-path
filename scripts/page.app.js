@@ -27,7 +27,7 @@ function slot(el,t,S,seed){ el.style.background=col(t);
   el.innerHTML=`<div class="rec">#${seed} seed</div><div class="nm">${nm(t)}</div><div class="rec">${rec(S,t)} Big 12</div>`; }
 
 let LIVEOK=null;
-function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · every 10 sec · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
+function liveMsg(){ const t=SCAT?new Date(SCAT).toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"}):""; return LIVEOK===true?`Live from ESPN · ${(gameDay()||ANYLIVE)?"every 10 sec":"every 5 min (no games today)"} · ${t}`: LIVEOK===false?`Scores as of ${t} (ESPN not reachable right now)`:`Scores as of ${t} · connecting…`; }
 function render(){
   S0=buildState(REMAINING.map((g,i)=>finW(i)));
   const EP=eff(picks);
@@ -78,6 +78,7 @@ document.addEventListener("click",e=>{
 render();
 // ---- website mode: live scores straight from ESPN every 10s; model data from data/*.json every 2 min ----
 const ESPN="https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard";
+let LASTSIG=null, ANYLIVE=false, LASTMODEL={};
 async function liveScores(){
   try{
     const games=[], seen=new Set(), add=(e,b12)=>{ const c=e.competitions[0], s=c.status.type; const H=c.competitors.find(x=>x.homeAway==="home"),A=c.competitors.find(x=>x.homeAway==="away"); const k=H.team.abbreviation+"|"+A.team.abbreviation; if(seen.has(k)) return; seen.add(k); games.push({h:H.team.abbreviation,a:A.team.abbreviation,hs:+H.score||0,as:+A.score||0,state:s.state,detail:s.shortDetail,start:e.date,nat:!b12}); };
@@ -85,13 +86,20 @@ async function liveScores(){
     const urls=[10,11,12,13].map(w=>[`${ESPN}?groups=4&limit=200&seasontype=2&dates=2026&week=${w}`,true]).concat([ymd(et),ymd(new Date(et-864e5))].map(d=>[`${ESPN}?groups=80&limit=400&dates=${d}`,false]));
     const res=await Promise.all(urls.map(([u])=>fetch(u).then(r=>r.json()).catch(()=>null)));
     res.forEach((j,i)=>{ if(j) (j.events||[]).forEach(e=>add(e,urls[i][1])); });
-    if(games.length){ setScores({updatedAt:new Date().toISOString(),games}); LIVEOK=true; render(); }
+    if(games.length){ const sig=games.map(g=>g.h+g.a+g.hs+g.as+g.state+g.detail).join("|"); const changed=sig!==LASTSIG; LASTSIG=sig;
+      setScores({updatedAt:new Date().toISOString(),games}); const was=LIVEOK; LIVEOK=true;
+      if(changed||was!==true) render(); else { const n=document.getElementById("livenote"); if(n) n.textContent=liveMsg(); }
+      ANYLIVE=games.some(g=>g.state==="in"); }
   }catch(e){ LIVEOK=false; render(); }
 }
 async function modelData(){
   const get=f=>fetch("data/"+f+"?t="+Date.now()).then(r=>r.ok?r.json():null).catch(()=>null);
   const [o,c,w]=await Promise.all([get("odds.json"),get("cfp.json"),get("weekly.json")]);
-  if(o&&window.renderPaths) window.renderPaths(o); if(c&&window.cfpUpdate) window.cfpUpdate(c); if(w&&window.weeklyUpdate) window.weeklyUpdate(w);
+  const same=(k,v)=>{ if(!v) return true; const s=v.computedAt||JSON.stringify(v).length; if(LASTMODEL[k]===s) return true; LASTMODEL[k]=s; return false; };
+  if(!same("o",o)&&window.renderPaths) window.renderPaths(o); if(!same("c",c)&&window.cfpUpdate) window.cfpUpdate(c); if(!same("w",w)&&window.weeklyUpdate) window.weeklyUpdate(w);
 }
-setTimeout(()=>{ liveScores(); modelData(); },0); setInterval(liveScores,10000); setInterval(modelData,120000);
+// game days (Thu, Fri, Sat, plus early Sunday for late games, Eastern time) or any game live: every 10s. Otherwise every 5 min.
+function gameDay(){ const et=new Date(new Date().toLocaleString("en-US",{timeZone:"America/New_York"})); const d=et.getDay(), h=et.getHours(); return d===4||d===5||d===6||(d===0&&h<4); }
+function loop(){ liveScores().finally(()=>setTimeout(loop,(gameDay()||ANYLIVE)?10000:300000)); }
+setTimeout(()=>{ loop(); modelData(); },0); setInterval(modelData,120000);
 </script>

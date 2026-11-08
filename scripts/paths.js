@@ -76,7 +76,8 @@ function whyRoot(team,opp,mode){
   if(o&&o.cfp>0.02) return `${nmx(opp)} has a ${pct(o.cfp)} playoff shot, and a loss removes a team BYU could get stuck behind.`;
   return `A ${nmx(opp)} win would add another team BYU has to stay ahead of in the rankings.`;
 }
-document.addEventListener("click",e=>{ const g=e.target.closest(".grow.tap"); if(g){ const w=g.querySelector(".whyline"); if(w) w.hidden=!w.hidden; } });
+const OPENWHY=new Set();
+document.addEventListener("click",e=>{ const g=e.target.closest(".grow.tap"); if(g){ const w=g.querySelector(".whyline"); if(w){ w.hidden=!w.hidden; const k=g.dataset.k; if(k){ w.hidden?OPENWHY.delete(k):OPENWHY.add(k); } } } });
 
 const tn=ab=>(CF.names[ab]||[ab])[0];
 const pc=x=>pct(x);
@@ -101,10 +102,25 @@ function guide(){
       const col2=(CF.names[r.team]||[,"#888"])[1];
       const uns=(CF.unsure||[]).includes(r.id)?`<span class="care c0" title="Direction depends on how much the committee rewards BYU's wins over Notre Dame and Arizona">Unsure</span>`:"";
       const ccg=Math.abs(r.cc)>=0.005?`<span class="ccg">${r.cc>0?"+":""}${(r.cc*100).toFixed(1)} to Big 12 title game</span>`:"";
-      return `<div class="grow tap"><div class="bar6" style="background:${col2}"></div><div class="main"><div class="r1">${own?`BYU must beat ${tn(r.opp)}`:`Root for <b>${tn(r.team)}</b> over ${tn(r.opp)}`}</div><div class="r2">BYU playoff odds ${pc(r.lo)} → ${pc(r.hi)}</div>${st}<div class="whyline" hidden>${whyRoot(r.team,r.opp,"cfp")}</div></div><div class="side"><span class="care c${r.lv}">${CARE[r.lv]}</span>${uns}<span class="pts">+${(r.d*100).toFixed(1)}</span>${ccg}</div></div>`; }).join("")}</section>`;
+      const wk="o|"+r.h+"|"+r.a; return `<div class="grow tap" data-k="${wk}"><div class="bar6" style="background:${col2}"></div><div class="main"><div class="r1">${own?`BYU must beat ${tn(r.opp)}`:`Root for <b>${tn(r.team)}</b> over ${tn(r.opp)}`}</div><div class="r2">BYU playoff odds ${pc(r.lo)} → ${pc(r.hi)}</div>${st}<div class="whyline" ${OPENWHY.has(wk)?"":"hidden"}>${whyRoot(r.team,r.opp,"cfp")}</div></div><div class="side"><span class="care c${r.lv}">${CARE[r.lv]}</span>${uns}<span class="pts">+${(r.d*100).toFixed(1)}</span>${ccg}</div></div>`; }).join("")}</section>`;
   }).join("");
 }
+let CCALL=false;
+function committeeCard(){
+  const C=CF.committee; if(!C){ document.getElementById("ccheck").hidden=true; return; }
+  const L=C.latest, G=C.grade, W=(WKD&&WKD.weeks&&WKD.weeks[0])||null;
+  const byu=L.ranks.find(x=>x.ab==="BYU");
+  let g=`<p class="note" style="margin:6px 0 10px">Latest committee ranking: <b>${L.label}</b>. BYU is <b>${byu?"#"+byu.rk:"unranked"}</b>.`;
+  if(G) g+=` The model projected BYU at <b>#${G.byuProjected.toFixed(1)}</b> for this ranking, and it was off by an average of <b>${G.avgMiss} spots</b> across the top 25 (${G.top12Hit} of the top 12 right).`;
+  if(W && new Date(W.releaseDate)>new Date(L.date)) g+=` Next ranking: <b>${W.release}</b>, where the model projects BYU at <b>#${W.byuAvg.toFixed(1)}</b>.`;
+  $("ccgrade").innerHTML=g+"</p>";
+  const rows=CCALL?L.ranks:L.ranks.slice(0,12);
+  $("cclist").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Record</th><th class="r">Last week</th></tr>`+rows.map(x=>{ const mv=x.prev&&x.prev!==x.rk?(x.prev>x.rk?`<span style="color:var(--good)">▲${x.prev-x.rk}</span>`:`<span style="color:#e5383b">▼${x.rk-x.prev}</span>`):"—"; return `<tr class="${x.ab==="BYU"?"me":""}"><td>${x.rk}</td><td>${x.name}</td><td class="r">${x.rec}</td><td class="r">${mv}</td></tr>`; }).join("");
+  $("ccmore").textContent=CCALL?"Show top 12":"Show all 25";
+}
+document.addEventListener("click",e=>{ if(e.target.id==="ccmore"){ CCALL=!CCALL; committeeCard(); } });
 function atlarge(){
+  committeeCard();
   const B=CF.byu;
   $("albig").innerHTML=`<b>${pc(B.alGivenNotChamp)}</b><span>chance of an at-large bid if BYU doesn't win the Big 12<br>Overall: ${pc(B.atLarge)} at-large + ${pc(B.champ)} as Big 12 champ</span>`;
   $("alnote").textContent="An at-large spot goes to the highest-ranked teams left after the 5 automatic bids (Big 12, SEC, Big Ten and ACC champions, plus the top Group of Six team) and Notre Dame if it's in the top 12.";
@@ -129,7 +145,7 @@ function weekly(){
   $("wkgames").innerHTML=G.length? G.map(g=>{ const own=g.h==="BYU"||g.a==="BYU"; const k=g.h+"|"+g.a; const S=(typeof SC!=="undefined")?SC[k]:null;
     let st=""; if(S&&S.state==="in"){ const lead=S.hs===S.as?null:(S.hs>S.as?S.h:S.a); st=`<div style="margin-top:3px"><span class="st ${lead===null?"live":lead===g.team?"good":"bad"}">● ${nm2(S.a)} ${S.as}-${S.hs} · ${S.detail}</span></div>`; }
     else if(S&&S.state==="post"){ const win=S.hs>S.as?S.h:S.a; st=`<div style="margin-top:3px"><span class="st ${win===g.team?"good":"bad"}">Final · ${win===g.team?"helped":"hurt"}</span></div>`; }
-    return `<div class="grow tap"><div class="bar6" style="background:${(WKD.names[g.team]||[,"#888"])[1]}"></div><div class="main"><div class="r1">${own?`BYU must beat ${nm2(g.opp)}`:`Root for <b>${nm2(g.team)}</b> over ${nm2(g.opp)}`}</div><div class="r2">BYU projected #${g.worst.toFixed(1)} → #${g.best.toFixed(1)}</div>${st}<div class="whyline" hidden>${whyRoot(g.team,g.opp,"al")}</div></div><div class="side"><span class="care c${g.lv}">${CARE[g.lv]}</span><span class="pts">↑${g.d.toFixed(2)}</span></div></div>`; }).join("") : `<p class="note">No games left this week move BYU's ranking.</p>`;
+    const wk="a|"+g.h+"|"+g.a; return `<div class="grow tap" data-k="${wk}"><div class="bar6" style="background:${(WKD.names[g.team]||[,"#888"])[1]}"></div><div class="main"><div class="r1">${own?`BYU must beat ${nm2(g.opp)}`:`Root for <b>${nm2(g.team)}</b> over ${nm2(g.opp)}`}</div><div class="r2">BYU projected #${g.worst.toFixed(1)} → #${g.best.toFixed(1)}</div>${st}<div class="whyline" ${OPENWHY.has(wk)?"":"hidden"}>${whyRoot(g.team,g.opp,"al")}</div></div><div class="side"><span class="care c${g.lv}">${CARE[g.lv]}</span><span class="pts">↑${g.d.toFixed(2)}</span></div></div>`; }).join("") : `<p class="note">No games left this week move BYU's ranking.</p>`;
   $("wkboard").innerHTML=`<tr><th>#</th><th>Team</th><th class="r">Avg spot</th></tr>`+W.board.slice(0,20).map((b,i)=>`<tr class="${b.ab==="BYU"?"me":""}"><td>${i+1}</td><td>${nm2(b.ab)}</td><td class="r">${b.r.toFixed(1)}</td></tr>`).join("");
 }
 document.addEventListener("click",e=>{ const c=e.target.closest(".wkc"); if(c){ wsel=+c.dataset.i; weekly(); } });
