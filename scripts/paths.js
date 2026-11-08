@@ -157,7 +157,7 @@ let WKD=WEEKLY0, wsel=0;
 function weekly(){
   if(!WKD||!WKD.weeks.length){ $("wkgames").innerHTML=""; return; }
   // board = the committee's next release; movers = the first week that still has games to play
-  const B=WKD.weeks[0]; const W=WKD.weeks.find(w=>w.games&&w.games.length)||B; const nm2=ab=>(WKD.names[ab]||[ab])[0];
+  const B=WKD.weeks[0]; const W=WKD.weeks.find(w=>(w.games||[]).some(g=>Math.abs(g.rA-g.rH)>=0.05))||B; const nm2=ab=>(WKD.names[ab]||[ab])[0];
   wsel=0; $("wkchips").innerHTML=""; if(0) WKD.weeks.map((w,i)=>`<button class="chipb wkc" data-i="${i}" aria-pressed="${i===wsel}" style="${i===wsel?"background:#0062B8":""}">${w.label} games → ${w.release} ranking</button>`).join("");
   const byuSpot=W.board.findIndex(b=>b.ab==="BYU")+1;
   $("wkbig").innerHTML=`<b>#${byuSpot||Math.round(W.byuAvg)}</b><span>BYU's projected spot in the ${W.release} ranking<br>Average across simulations: ${W.byuAvg.toFixed(1)}<br>${pct(W.byuTop12)} chance BYU is in the top 12</span>`;
