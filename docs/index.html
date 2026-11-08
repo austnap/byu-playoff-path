@@ -239,7 +239,11 @@ details summary{cursor:pointer;font-family:var(--display);font-weight:700;text-t
 #guideView > section:first-child .cfpbig b{color:#fff}
 #guideView > section:first-child .cfpbig span,#guideView > section:first-child .note,#guideView > section:first-child .splitlbl,#guideView > section:first-child .legend2{color:rgba(255,255,255,.85)}
 #guideView > section:first-child .splitlbl b{color:#fff}
-#guideView > section:first-child .split{background:rgba(255,255,255,.2)}
+#guideView > section:first-child .split{background:rgba(255,255,255,.2);margin-top:18px}
+#guideView > section:first-child .cfpbig{margin-top:12px}
+#guideView > section:first-child .splitlbl{margin-top:9px}
+#guideView > section:first-child #gnote{margin-top:14px!important}
+#guideView > section:first-child .legend2{margin-top:14px}
 #guideView > section:first-child summary,#guideView > section:first-child .why,#guideView > section:first-child .why b{color:#fff}
 #guideView > section:first-child .care.c0{color:#fff;border-color:rgba(255,255,255,.5)}
 /* ---- mobile polish (audit) ---- */
@@ -710,7 +714,7 @@ function heroInfo(){
 function guide(){
   heroInfo();
   const B=CF.byu, notIn=1-B.cfp;
-  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff${CF.range?`<br>likely ${pc(CF.range[0])} to ${pc(CF.range[1])}`:""}<br>Big 12 title game: ${pc(B.ccg)}</span>`;
+  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff<br>Big 12 title game: ${pc(B.ccg)}</span>`;
   $("split").innerHTML=`<i style="width:${B.champ*100}%;background:#ffffff"></i><i style="width:${B.atLarge*100}%;background:#8cc0f2"></i>`;
   $("split").insertAdjacentHTML("afterend","");
   const lbl=document.getElementById("splitlbl")||Object.assign(document.createElement("div"),{id:"splitlbl",className:"splitlbl"}); $("split").after(lbl);

@@ -99,7 +99,7 @@ function heroInfo(){
 function guide(){
   heroInfo();
   const B=CF.byu, notIn=1-B.cfp;
-  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff${CF.range?`<br>likely ${pc(CF.range[0])} to ${pc(CF.range[1])}`:""}<br>Big 12 title game: ${pc(B.ccg)}</span>`;
+  $("cfpbig").innerHTML=`<b>${pc(B.cfp)}</b><span>to make the 12-team playoff<br>Big 12 title game: ${pc(B.ccg)}</span>`;
   $("split").innerHTML=`<i style="width:${B.champ*100}%;background:#ffffff"></i><i style="width:${B.atLarge*100}%;background:#8cc0f2"></i>`;
   $("split").insertAdjacentHTML("afterend","");
   const lbl=document.getElementById("splitlbl")||Object.assign(document.createElement("div"),{id:"splitlbl",className:"splitlbl"}); $("split").after(lbl);
