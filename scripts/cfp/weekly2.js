@@ -31,9 +31,10 @@ const beatL=[...Array(NT)].map(()=>[]), lostL=[...Array(NT)].map(()=>[]);
 for(const g of Object.values(games)){ if(g.state!=="post") continue; const h=ix[g.h],a=ix[g.a]; if(h==null||a==null) continue; const w=g.hw?h:a,l=g.hw?a:h; beatL[w].push(l); lostL[l].push(w); h2h[w+"|"+l]=1; }
 const remPair={}; rem.forEach((g,k)=>{ if(g.h!=null&&g.a!=null){ remPair[g.h+"|"+g.a]=k; remPair[g.a+"|"+g.h]=k; } });
 const QW=0,QL=0,H2H=0; // replaced by learned committee model
-const CM=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})));
+const AP5=((rank.rankings.find(r=>/AP Top 25/.test(r.name))||{}).ranks||[]).filter(r=>r.current<=5).map(r=>ix[r.team.id]).filter(i=>i!=null);
+const CM=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})),AP5);
 // residual: committee's own view vs model on Nov 3 (games before Nov 3 only)
-const CM0=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&g.date<ANCHOR&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})));
+const CM0=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&g.date<ANCHOR&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})),AP5);
 const S0=CM0.score(CM0.base,null); const sorted=[...S0].sort((a,b)=>b-a); const RES=new Float64Array(NT); const RESW=+(process.env.RESW??1.0);
 cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) RES[i]=RESW*(sorted[r.current-1]-S0[i]); });
 const NZC=+(process.env.NZC??0.9);

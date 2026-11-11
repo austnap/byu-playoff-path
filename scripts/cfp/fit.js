@@ -9,6 +9,12 @@ for(const Y of Object.keys(T)){ const D=T[Y]; const ND=Object.keys(D.ab).find(k=
     const X=features(ids,gs,D.fpi,D.conf,champs,ND);
     const h2h={}; for(const g of gs){ h2h[(g.hw?g.h:g.a)+"|"+(g.hw?g.a:g.h)]=1; }
     rels.push({Y,date:r.date,ranked:r.ids.filter(id=>X[id]),X,h2h,ids:ids.filter(id=>X[id]), ab:D.ab}); } }
+// wins over the AP poll's top 5 (the poll released just before each committee ranking)
+{ const APD=fs.existsSync(__dirname+'/ap.json')?JSON.parse(fs.readFileSync(__dirname+'/ap.json')):{}; const bs={}; rels.forEach(r=>(bs[r.Y]=bs[r.Y]||[]).push(r));
+  for(const r of rels){ const a=(APD[r.Y]||[])[bs[r.Y].indexOf(r)]; const top5=new Set(a?a.ranks.filter(x=>x.rk<=5).map(x=>x.id):[]); const c={};
+    for(const g of Object.values(T[r.Y].games)){ if(g.date>=r.date||g.post) continue; const w=g.hw?g.h:g.a,l=g.hw?g.a:g.h; if(top5.has(l)) c[w]=(c[w]||0)+1; }
+    for(const id of Object.keys(r.X)) r.X[id].push(c[id]||0); } }
+NAMES.push("top5Wins");
 // standardize
 const all=rels.flatMap(r=>r.ids.map(id=>r.X[id])); const K=NAMES.length;
 const mu=[...Array(K)].map((_,k)=>all.reduce((a,x)=>a+x[k],0)/all.length), sd=[...Array(K)].map((_,k)=>Math.sqrt(all.reduce((a,x)=>a+(x[k]-mu[k])**2,0)/all.length)||1);
@@ -38,4 +44,4 @@ const w=train(rels,3000);
 console.log("weights (std units):",NAMES.map((n,k)=>n+" "+w[k].toFixed(2)).join(", "),"| head-to-head",w[K].toFixed(2));
 const r26=rels.find(r=>r.Y==="2026"); const ev=evalRel(w,r26);
 console.log("2026 Nov 3: actual vs model:",r26.ranked.slice(0,25).map((id,i)=>r26.ab[id]+" "+(i+1)+"/"+ev.pos[id]).join(", "));
-fs.writeFileSync('committee.json',JSON.stringify({names:NAMES,mu,sd,w:w.slice(0,K),h2h:w[K]}));
+fs.writeFileSync(__dirname+'/committee.json',JSON.stringify({names:NAMES,mu,sd,w:w.slice(0,K),h2h:w[K]}));
