@@ -34,7 +34,7 @@ const QW=0,QL=0,H2H=0; // replaced by learned committee model
 const CM=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})));
 // residual: committee's own view vs model on Nov 3 (games before Nov 3 only)
 const CM0=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=>g.state==="post"&&g.date<ANCHOR&&(ix[g.h]!=null||ix[g.a]!=null)).map(g=>({h:ix[g.h]??null,a:ix[g.a]??null,hw:g.hw,neutral:g.neutral})));
-const S0=CM0.score(CM0.base,null); const sorted=[...S0].sort((a,b)=>b-a); const RES=new Float64Array(NT); const RESW=+(process.env.RESW??0.75);
+const S0=CM0.score(CM0.base,null); const sorted=[...S0].sort((a,b)=>b-a); const RES=new Float64Array(NT); const RESW=+(process.env.RESW??1.0);
 cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) RES[i]=RESW*(sorted[r.current-1]-S0[i]); });
 const NZC=+(process.env.NZC??0.9);
 // Big 12 mapping
