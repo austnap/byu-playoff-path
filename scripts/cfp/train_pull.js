@@ -20,6 +20,9 @@ const j=async u=>{for(let k=0;k<4;k++){try{const r=await fetch(u); if(r.status==
         const H=c.competitors.find(x=>x.homeAway==="home"),A=c.competitors.find(x=>x.homeAway==="away");
         const sc=x=>x.score==null?null:(typeof x.score==="object"?+x.score.value:+x.score);
         games[e.id]={date:e.date,h:H.team.id,a:A.team.id,hs:sc(H),as:sc(A),hw:!!H.winner,neutral:!!c.neutralSite,post:e.seasonType&&e.seasonType.type===3}; } })); }
+    const man=(fs.existsSync(__dirname+'/manual_ranks.json')?JSON.parse(fs.readFileSync(__dirname+'/manual_ranks.json')):[]).filter(m=>m.season===Y);
+    for(const m of man) if(!rel.some(r=>Math.abs(new Date(r.date)-new Date(m.date))<3*864e5)) rel.push({date:m.date,ids:m.ids});
+    rel.sort((a,b)=>a.date<b.date?-1:1);
     out[Y]={rel,fpi,games,conf,ab};
     console.log(Y,"releases",rel.length,rel.map(r=>r.date.slice(0,10)).join(" "),"teams",ids.length,"games",Object.keys(games).length);
   }
