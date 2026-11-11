@@ -5,7 +5,7 @@ cd "$(dirname "$0")"
 OUT=$(cd b12 && node fetch.js)
 echo "$OUT"
 if [[ "$FORCE" == "1" || "$FORCE" == "true" || "$OUT" == *'"newFinals":true'* ]]; then
-  (cd cfp && node pull.js && node train_pull.js > train.log && node fit.js > fit.log && tail -3 fit.log)
+  (cd cfp && node pull.js && node train_pull.js > train.log && node fit.js > fit.log && node ap_pull.js > ap.log && node fitg.js > fitg.log && tail -3 fit.log)
   node track.js pre
   node -e 'const {teams}=require("./cfp/nat.json"),E=require("./b12/engine.js"),m={};Object.values(teams).forEach(t=>{if(t.fpi!=null&&E.IDX[t.ab]!==undefined)m[t.ab]=+t.fpi.toFixed(1)});require("fs").writeFileSync("b12/fpi.json",JSON.stringify(m))'
   (cd b12 && ./update.sh)

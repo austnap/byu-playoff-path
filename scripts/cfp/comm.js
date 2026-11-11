@@ -10,8 +10,10 @@ function make(NT,FP,CONF,ND,finished){ // finished: [{h,a,hw,neutral}] indices (
   const p4=[...Array(NT)].map((_,i)=>(P4.has(CONF[i])||i===ND)?1:0);
   const copy=()=>{ const A={}; for(const k in base) A[k]=Float64Array.from(base[k]); return A; };
   const z=(v,k)=>(v-M.mu[k])/M.sd[k];
-  const score=(A,champ)=>{ const S=new Float64Array(NT); for(let i=0;i<NT;i++){ const g=A.w[i]+A.l[i]; const x=[g?A.w[i]/g:0,A.l[i],A.wa[i],A.qw[i],A.ew[i],A.bl[i],A.n[i]?A.sos[i]/A.n[i]:0,FP[i],p4[i],champ&&champ[i]?1:0];
-      let s=0; for(let k=0;k<x.length;k++) s+=M.w[k]*z(x[k],k); S[i]=s; } return S; };
-  return {base,copy,game,score,h2h:M.h2h};
+  const score=(A,champ,EXF)=>{ const S=new Float64Array(NT); for(let i=0;i<NT;i++){ const g=A.w[i]+A.l[i]; const x=[g?A.w[i]/g:0,A.l[i],A.wa[i],A.qw[i],A.ew[i],A.bl[i],A.n[i]?A.sos[i]/A.n[i]:0,FP[i],p4[i],champ&&champ[i]?1:0];
+      let s=0; for(let k=0;k<x.length;k++) s+=M.w[k]*z(x[k],k);
+      if(M.w.length>x.length&&EXF){ s+=M.w[x.length]*(EXF.ap[i]||0)+M.w[x.length+1]*(EXF.prev[i]||0); } // general inputs: AP points (0-1), last committee spot (0-1)
+      S[i]=s; } return S; };
+  return {base,copy,game,score,h2h:M.h2h,general:!!M.general,M};
 }
 module.exports={make};

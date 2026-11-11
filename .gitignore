@@ -10,3 +10,4 @@ scripts/cfp/v*.json
 scripts/cfp/*.log
 scripts/cfp/train.json
 node_modules/
+scripts/cfp/*.log

@@ -37,6 +37,12 @@ const CM0=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=
 const S0=CM0.score(CM0.base,null); const sorted=[...S0].sort((a,b)=>b-a); const RES=new Float64Array(NT); const RESW=+(process.env.RESW??1.0);
 cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) RES[i]=RESW*(sorted[r.current-1]-S0[i]); });
 const NZC=+(process.env.NZC??0.9);
+// general inputs for every team: AP points from the latest AP poll, spot in the latest committee ranking
+const apPoll=rank.rankings.find(r=>/AP Top 25/.test(r.name)); const apRaw=new Float64Array(NT);
+if(apPoll){ [...(apPoll.ranks||[]),...(apPoll.others||[])].forEach(r=>{ const i=ix[r.team.id]; if(i!=null) apRaw[i]=r.points||0; }); }
+const apMax=Math.max(1,...apRaw); const EXF={ap:[...apRaw].map(v=>v/apMax),prev:new Array(NT).fill(0)};
+cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) EXF.prev[i]=(26-r.current)/25; });
+if(CM.general) RES.fill(0); // no team-specific adjustments in the general model
 // Big 12 mapping
 const b12=E.REMAINING.map(([h,a])=>{ const g=Object.values(games).find(x=>teams[x.h]?.ab===h&&teams[x.a]?.ab===a&&x.conf); return g; });
 const b12fix=b12.map(g=>g.state==="post"?(g.hw?E.IDX[teams[g.h].ab]:E.IDX[teams[g.a].ab]):-1);
@@ -68,7 +74,7 @@ for(let s=0;s<NS;s++){
     const pA=Phi((FP[A]-FP[Bt])/SD); const aw=Math.random()<pA; const W=aw?A:Bt,L=aw?Bt:A;
     CM.game(ACC,W,L,true,true); champ[c]=W; }
   const chf=new Uint8Array(NT); for(const c in champ) chf[champ[c]]=1;
-  const SC=CM.score(ACC,chf); for(let i=0;i<NT;i++) R[i]=SC[i]+RES[i]+nrm()*NZC;
+  const SC=CM.score(ACC,chf,EXF); for(let i=0;i<NT;i++) R[i]=SC[i]+RES[i]+nrm()*NZC;
   const order=[...Array(NT).keys()].sort((x,y)=>R[y]-R[x]);
   const beat=(x,y)=>{ if(h2h[x+"|"+y]) return true; const k=remPair[x+"|"+y]; if(k===undefined) return false; const g=rem[k]; return (w[k]?g.h:g.a)===x; };
   for(let pass=0;pass<3;pass++) for(let i=0;i<40;i++){ const a=order[i],b=order[i+1]; if(R[a]-R[b]<CM.h2h && beat(b,a)){ order[i]=b; order[i+1]=a; } }

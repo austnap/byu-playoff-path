@@ -37,6 +37,12 @@ const CM0=require('./comm.js').make(NT,FP,CONF,ND,Object.values(games).filter(g=
 const S0=CM0.score(CM0.base,null); const sorted=[...S0].sort((a,b)=>b-a); const RES=new Float64Array(NT); const RESW=+(process.env.RESW??1.0);
 cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) RES[i]=RESW*(sorted[r.current-1]-S0[i]); });
 const NZC=+(process.env.NZC??0.9);
+// general inputs for every team: AP points from the latest AP poll, spot in the latest committee ranking
+const apPoll=rank.rankings.find(r=>/AP Top 25/.test(r.name)); const apRaw=new Float64Array(NT);
+if(apPoll){ [...(apPoll.ranks||[]),...(apPoll.others||[])].forEach(r=>{ const i=ix[r.team.id]; if(i!=null) apRaw[i]=r.points||0; }); }
+const apMax=Math.max(1,...apRaw); const EXF={ap:[...apRaw].map(v=>v/apMax),prev:new Array(NT).fill(0)};
+cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) EXF.prev[i]=(26-r.current)/25; });
+if(CM.general) RES.fill(0); // no team-specific adjustments in the general model
 // Big 12 mapping
 const b12=E.REMAINING.map(([h,a])=>{ const g=Object.values(games).find(x=>teams[x.h]?.ab===h&&teams[x.a]?.ab===a&&x.conf); return g; });
 const b12fix=b12.map(g=>g.state==="post"?(g.hw?E.IDX[teams[g.h].ab]:E.IDX[teams[g.a].ab]):-1);
@@ -61,7 +67,7 @@ for(const [lbl,from,to,rel] of WEEKS){
     const ACC=CM.copy();
     for(const k of ks){ const g=rem[k]; const hw=Math.random()<g.p; w[k]=hw; const W=hw?g.h:g.a,L=hw?g.a:g.h;
       CM.game(ACC,g.h,g.a,hw,false); }
-    const SCw=CM.score(ACC,null); for(let i=0;i<NT;i++) R[i]=SCw[i]+RES[i]+nrm()*NZC;
+    const SCw=CM.score(ACC,null,EXF); for(let i=0;i<NT;i++) R[i]=SCw[i]+RES[i]+nrm()*NZC;
     const order=[...Array(NT).keys()].sort((x,y)=>R[y]-R[x]);
     const beat=(x,y)=>{ if(h2h[x+"|"+y]) return true; const k=remPair[x+"|"+y]; if(k===undefined||rem[k].date>=to) return false; const g=rem[k]; return (w[k]?g.h:g.a)===x; };
     for(let pass=0;pass<3;pass++) for(let i=0;i<40;i++){ const a=order[i],b=order[i+1]; if(R[a]-R[b]<CM.h2h && beat(b,a)){ order[i]=b; order[i+1]=a; } }
@@ -70,8 +76,19 @@ for(const [lbl,from,to,rel] of WEEKS){
     for(const k of inWeek) if(w[k]){ nH[k]++; sumH[k]+=rb; topH[k]+=t12; }
   }
   const games=inWeek.map(k=>{ const g=rem[k]; const nA=NSW-nH[k]; return {id:g.id,h:AB[g.h],a:AB[g.a],p:+g.p.toFixed(3),date:g.date,rH:+(sumH[k]/nH[k]).toFixed(3),rA:+((sum-sumH[k])/nA).toFixed(3),tH:+(topH[k]/nH[k]).toFixed(4),tA:+((top-topH[k])/nA).toFixed(4)}; });
-  const board=[...Array(NT).keys()].map(i=>({ab:AB[i],r:avgRk[i]/NSW})).sort((a,b)=>a.r-b.r).slice(0,25).map(x=>({ab:x.ab,r:+x.r.toFixed(1)}));
-  out.weeks.push({label:lbl,release:rel,releaseDate:to,byuAvg:+(sum/NSW).toFixed(2),byuTop12:+(top/NSW).toFixed(4),dist:[...dist].map(x=>+(x/NSW).toFixed(4)),games,board});
+  let src=null; const board=[...Array(NT).keys()].map(i=>({ab:AB[i],r:avgRk[i]/NSW})).sort((a,b)=>a.r-b.r).slice(0,25).map(x=>({ab:x.ab,r:+x.r.toFixed(1)}));
+  // once the AP poll for this release is out and the week's games are done, project with AP + the committee's usual shifts
+  const apDate=apPoll?apPoll.date:"", cfpDate=cfp.date;
+  if(!ks.length && apDate>cfpDate && fs.existsSync(__dirname+'/shift.json')){
+    const SH=JSON.parse(fs.readFileSync(__dirname+'/shift.json')); const A=CM.base;
+    const apOrd=[...Array(NT).keys()].filter(i=>apRaw[i]>0).sort((a,b)=>apRaw[b]-apRaw[a]); const apRank={}; apOrd.forEach((t,k)=>apRank[t]=k+1);
+    const prevRank={}; cfp.ranks.forEach(r=>{ const i=ix[r.team.id]; if(i!=null) prevRank[i]=r.current; });
+    const val=apOrd.map(t=>{ const g=A.w[t]+A.l[t]; const x=[CONF[t]&&["1","4","5","8"].includes(CONF[t])||t===ND?1:0, isG6[t]?1:0, A.l[t]===0?1:0, A.l[t], (A.n[t]?A.sos[t]/A.n[t]:0)/10, FP[t]/10, A.wa[t], prevRank[t]?(apRank[t]-prevRank[t])/10:0, 0];
+      const shiftUp=x.reduce((s,v,k)=>s+v*SH.beta[k],0); return [t,apRank[t]-SH.damp*shiftUp]; }).sort((a,b)=>a[1]-b[1]);
+    board.length=0; val.slice(0,25).forEach(([t],k)=>board.push({ab:AB[t],r:k+1}));
+    sum=(board.findIndex(b=>b.ab==="BYU")+1||30)*NSW; top=(board.findIndex(b=>b.ab==="BYU")<12&&board.findIndex(b=>b.ab==="BYU")>=0?1:0)*NSW; src="ap";
+  }
+  out.weeks.push({label:lbl,release:rel,releaseDate:to,source:src||"sim",byuAvg:+(sum/NSW).toFixed(2),byuTop12:+(top/NSW).toFixed(4),dist:[...dist].map(x=>+(x/NSW).toFixed(4)),games,board});
   const g2=games.map(g=>({...g,d:g.rA-g.rH})).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
   console.log(`== ${lbl} -> ${rel} ranking: BYU avg #${(sum/NSW).toFixed(1)}, top-12 ${(top/NSW*100).toFixed(0)}%`);
   console.log(g2.slice(0,8).map(g=>`  ${g.a}@${g.h}: BYU rank if ${g.h} wins ${g.rH.toFixed(2)}, if ${g.a} wins ${g.rA.toFixed(2)}`).join("\n"));
