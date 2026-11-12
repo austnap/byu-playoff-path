@@ -10,7 +10,7 @@ function make(NT,FP,CONF,ND,finished,TOP5){ const top5=new Set(TOP5||[]); // fin
   const p4=[...Array(NT)].map((_,i)=>(P4.has(CONF[i])||i===ND)?1:0);
   const copy=()=>{ const A={}; for(const k in base) A[k]=Float64Array.from(base[k]); return A; };
   const z=(v,k)=>(v-M.mu[k])/M.sd[k];
-  const score=(A,champ,EXF)=>{ const S=new Float64Array(NT); for(let i=0;i<NT;i++){ const g=A.w[i]+A.l[i]; const x=[g?A.w[i]/g:0,A.l[i],A.wa[i],A.qw[i],A.ew[i],A.bl[i],A.n[i]?A.sos[i]/A.n[i]:0,FP[i],p4[i],champ&&champ[i]?1:0]; if(M.names&&M.names.includes("top5Wins")) x.push(A.t5[i]); if(M.names&&M.names.includes("lossSq")) x.push(A.l[i]*A.l[i]);
+  const score=(A,champ,EXF)=>{ const S=new Float64Array(NT); for(let i=0;i<NT;i++){ const g=A.w[i]+A.l[i]; const x=[g?A.w[i]/g:0,A.l[i],A.wa[i],A.qw[i],A.ew[i],A.bl[i],A.n[i]?A.sos[i]/A.n[i]:0,FP[i],p4[i],champ&&champ[i]?1:0]; if(M.names&&M.names.includes("top5Wins")) x.push(A.t5[i]); if(M.names&&M.names.includes("lossSq")) x.push(A.l[i]*A.l[i]); if(M.names&&M.names.includes("loss3")) x.push(A.l[i]>=3?1:0);
       let s=0; for(let k=0;k<x.length;k++) s+=M.w[k]*z(x[k],k);
       if(M.w.length>x.length&&EXF){ s+=M.w[x.length]*(EXF.ap[i]||0)+M.w[x.length+1]*(EXF.prev[i]||0); } // general inputs: AP points (0-1), last committee spot (0-1)
       S[i]=s; } return S; };

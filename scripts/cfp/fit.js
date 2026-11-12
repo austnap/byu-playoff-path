@@ -16,6 +16,7 @@ for(const Y of Object.keys(T)){ const D=T[Y]; const ND=Object.keys(D.ab).find(k=
     for(const id of Object.keys(r.X)) r.X[id].push(c[id]||0); } }
 NAMES.push("top5Wins");
 {const L=NAMES.indexOf("losses"); for(const r of rels) for(const id of Object.keys(r.X)) r.X[id].push(r.X[id][L]*r.X[id][L]); NAMES.push("lossSq");}
+{const L=NAMES.indexOf("losses"); for(const r of rels) for(const id of Object.keys(r.X)) r.X[id].push(r.X[id][L]>=3?1:0); NAMES.push("loss3");}
 // standardize
 const all=rels.flatMap(r=>r.ids.map(id=>r.X[id])); const K=NAMES.length;
 const mu=[...Array(K)].map((_,k)=>all.reduce((a,x)=>a+x[k],0)/all.length), sd=[...Array(K)].map((_,k)=>Math.sqrt(all.reduce((a,x)=>a+(x[k]-mu[k])**2,0)/all.length)||1);
